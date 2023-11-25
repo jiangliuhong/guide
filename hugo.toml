@@ -1,0 +1,11 @@
+baseURL = 'https://guide.jiangliuhong.top/'
+languageCode = 'zh-cn'
+title = '面试集锦'
+theme = 'hugo-book'
+enableGitInfo = true
+[params]
+BookTheme = 'auto'
+BookToC = true
+BookMenuBundle = '/menu'
+BookSection = 'docs'
+BookSearch = true
