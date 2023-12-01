@@ -9,3 +9,4 @@ BookToC = true
 BookMenuBundle = '/menu'
 BookSection = 'docs'
 BookSearch = true
+BookTranslatedOnly = true
