@@ -10,3 +10,6 @@ BookMenuBundle = '/menu'
 BookSection = 'docs'
 BookSearch = true
 BookTranslatedOnly = true
+[markup.tableOfContents]
+  startLevel = 2
+  endLevel = 6

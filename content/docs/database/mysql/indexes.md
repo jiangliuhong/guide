@@ -45,7 +45,245 @@ draft = false
 
 在执行模糊查询的时候，如`like "value%"`，这种情况下，需要考虑使用全文搜索的方式进行优化。全文搜索在MySQL中是一个FULLTEXT类型索引。全文索引主要用来查找文本中的关键字，而不是直接与索引中的值进行比较，它更像是一个搜索引擎，而不是简单的where语句的参数匹配。目前只有char/vachar/text列上可以创建全文索引，默认Mysql不支持中文全文搜索。Mysql全文搜索只是一个临时方案，对于全文搜索场景，更专业的做法是使用全文搜索引擎，如ElasticSearch。
 
+#### Hash 索引
+
+TODO
+
+#### 组合索引
+
+TODO
+
+#### 聚簇索引与非聚簇索引
+
+TODO
+
 ## MySQL 索引机制
 
-### 为什么InnoDB要使用 B+ 树
+### 为什么InnoDB要使用 B+ 树，而不是 B 树
 
+首先，由于索引本身数据量大，所以只能以索引文件的形式存储在磁盘上，也就导致每次读取索引都会产生磁盘 I/O 消耗，所以选用的数据结构能获取更多的信息并且 I/O 消耗更低就尤为重要。
+
+#### B 树概念
+
+B 树是一种自平衡的二叉树，它维护有序数据并允许对树进行搜索、顺序访问、插入和删除。它是二叉搜索树的一种演化，在 B 树中，一个父节点可以有多个子节点。
+
+B 树是一种平衡的多分树，通常我们说 m 阶的 B 树，他必须满足如下条件：
+
+- 每个节点最多有 m 个子节点
+- 每个非叶子节点（除去根节点）具有至少 m/2 个子节点
+- 根节点至少有两个子节点
+- 具有 k 个子节点的非叶子节点包含 k-1 个键
+
+![B树结构](https://static.jiangliuhong.top/images/2023/12/131702451517376.png)
+
+B 树的阶，指的是 B 树中节点的子节点数目的最大值。例如在上图的书中，「13,16,19」拥有的子节点数目最多，一共有四个子节点（灰色节点）。所以该 B 树的阶为 4，该树称为 4 阶 B 树。在实际应用中，B 树应用于 MongoDb 的索引。
+
+#### B+ 树概念
+
+B+ 树是由 B 树演变的，是使用文件系统使用的数据结构：
+- 有 m 个子树的中间节点包含有 m 个元素，每个元素不保持数据，只作为索引使用。
+- 所有的叶子节点中包含了关键字的信息，以及这些关键字记录的指针，并且叶子节点本身按照关键字的大小从大到小的顺序排列。
+
+![B+树结构](https://static.jiangliuhong.top/images/2023/12/1416181905626579.jpg)
+
+与 B 树相比，B+ 树的有点为：
+
+- B+ 树的磁盘读写代驾更低：B+ 树的内部节点并没有指向关键字的指针信息，所以内部节点所使用的空间更小，对于相同大小能存放的关键字信息就更多，所以一次读入内存的关键字也就更多，从而减少 I/O 次数。
+- B+ 树查询效率更加稳定：由于 B+ 非终节点并不实际指向文件内容，只是存储叶子节点的关键字索引，所以 B+ 树中任何关键字的查询必须从根节点查询到叶子节点，所有关键字的查询的遍历层级是相同的，也就是导致数据查询效率相当。
+- B+ 树更适合用于范围查找：对于遍历，B+ 树只需要遍历叶子节点就可以实现整棵树的遍历。
+
+#### 高度为 3 的 B+ 树能存多少数据
+
+### InnoDB 与 MyISAM 引擎下的索引区别
+
+#### Innodb 中 B+ 树是如何产生的
+
+#### Innodb 是如何支持范围查找能走索引的
+
+### 索引下推
+
+索引下推（ICP）是 MySQL5.6 针对扫描二级索引的一项优化改造。通过把索引过滤条件下推到存储引擎，来减少 MySQL 存储引擎访问基表的次数以及 MySQL 服务层访问存储引擎的次数。ICP 适用于 MYISAM 和 INNODB 引擎。
+
+#### 认识mysql架构
+
+
+
+<img src="https://static.jiangliuhong.top/images/2024/1/21704179867555.png" alt="MySQL 架构" style="zoom:50%;" />
+
+- MySQL 服务层：也就是 SERVER 层，用来解析 SQL 的语法、语义、生成查询计划、接管从 MySQL 存储引/擎层上推的数据进行二次过滤等等。
+- MySQL 存储引擎层：按照 MySQL 服务层下发的请求，通过索引或者全表扫描等方式把数据上传到MySQL 服务层。
+- MySQL 索引扫描：根据指定索引过滤条件，遍历索引找到索引键对应的主键值后回表过滤剩余过滤条件。
+- MySQL 索引过滤：通过索引扫描并且基于索引进行二次条件过滤后再回表。
+
+
+
+#### 索引下推的作用
+
+**作用：减少回表次数**
+
+现在以一个例子展示索引下推：
+
+```sql
+-- 创建表
+create table user (
+ id int primary key comment 'id' ,
+ name varchar(20) comment '姓名',
+ age int comment '年龄',
+ card int comment '身份证',
+ key idx_name_age (name,age)
+)engine=InnoDB default charset=utf8mb4;
+-- 插入数据
+insert into user values (1,'李四',18,1),(2,'李五',20,2),(3,'王五',23,3),(4,'张三',30,4);
+```
+
+查询执行计划：
+
+```sql
+explain select * from user where name like '李%' and age >= 18;
+-- 结果为：Using where
+```
+
+设置索引下推
+
+```sql
+SET optimizer_switch='index_condition_pushdown=on';
+```
+
+再次查询执行记录
+
+```sql
+explain select * from user where name like '李%' and age >= 18;
+-- 结果为：Using index condition
+```
+
+从索引计划可以看出，执行计划打印为`Using index condition`则代表使用了索引下推。
+
+假设执行sql为`select * from user where name like '李%' and age = 18`，通过下面的图可以很明显的看见两种情况下的查询逻辑
+
+未使用索引下推时的查询：
+
+![未使用索引下推时的查询](https://static.jiangliuhong.top/images/2024/1/31704273987720.png)
+
+使用索引下推时的查询：
+
+![使用索引下推时的查询](https://static.jiangliuhong.top/images/2024/1/31704274030853.png)
+
+命令总结：
+
+```sql
+＃ 查看索引下推是否开启
+select @@optimizer_switch
+#开启索引下推
+SET optimizer_switch='index_condition_pushdown=on';
+# 关闭索引下推
+SET optimizer_Switch="index_condition_pushdown=off";
+```
+
+#### 索引下推的使用条件
+
+- 索引下推的目标是减少全行记录读取，从而减少 IO 操作，只能用于非聚簇索引。（聚簇索引本身已包含行数据，不存在回表）
+- 只能用于 `range`、`ref`、`eq_ref`、`ref_or_null`等操作
+- where条件中使用and的时候（or为排除记录，不需要查询行数据）
+- 适用于分区表
+- 不支持在虚拟列上建立索引（例如：函数索引）
+- 不支持引用子查询作为查询条件
+- 不支持存储函数作为条件，因为在存储引擎中无法调用存储函数
+
+### 索引排序内部流程
+
+## 索引失效
+
+### 什么情况下索引失效
+
+在MySQL8中，索引失效的场景有：
+
+- `like`查询左边带`%`时可能会失效
+- 隐式类型转换，即索引字段与查询条件或关联字段类型不一致，MySQL会对其进行类型转换，从而导致索引失效
+- `where`条件中对索引列使用运算符或函数会导致失效
+- 使用`OR`查询，并且存在非索引时会导致失效
+- 使用` IN `查询可能会导致索引失效，在 MySQL 中，通过环境变量`eq_range_index_dive_limt`的值从而影响 `IN`查询，在 MySQL8 中，当该值 为 200 时，使用 IN 查询的条件个数大于 200则不会走索引
+- 使用非主键进行范围查询时，可能会失效
+- 使用`order by`可能会导致失效
+- `is null`、`is not null` `≠`可能会失效
+
+#### 字段为 null 索引是否失效
+
+首先`is null`、`is not null` `≠`都是可以走索引的，在MySQL中，MySQL会计算走索引与不走索引的成本，因为如果走索引扫描，那么必然会存在回表操作，MySQL 会计算结果列的大小，如果结果列远低于行数量，那么优化器就会执行索引扫描，然后再回表查询数据，反之，如果结果列数量较大，那么索引扫描后再回表的效率就远低于全表扫描。
+
+关于这个问题，更详细的还需要从null值的存储开始讲起：[null值的存储](../null_storage)
+
+#### LIKE 索引失效问题
+
+首先索引的数据结构是B+树，在 B+ 树中，数据是有序的，从下图中可以看出 4 个aba -> abb -> abc -> abc -> abe 是有序排列的，当输入条件为 like 'a%'时，在 B+ 树中是有序查找，所以like前模糊匹配是可以走索引的，但如果缓存后模糊匹配，由于结尾并不是有序排列的，所以此时索引会失效。
+
+![151705284761044.png](https://static.jiangliuhong.top/images/2024/1/151705284761044.png)
+
+但是在某些特定情况，前模糊匹配也可能失效：
+
+```sql
+-- 创建表
+create table user (
+ id int primary key comment 'id' ,
+ name varchar(20) comment '姓名',
+ card int comment '身份证',
+ key idx_name (name)
+)engine=InnoDB default charset=utf8mb4;
+-- 插入数据
+insert into user values (1,'李四',1),(2,'李五',2),(3,'王五',3),(4,'张三',4);
+
+-- 创建表
+create table user_exp(
+	id int primary key comment 'id',
+  name varchar(20) comment '姓名',
+  key idx_name (name)
+)engine=InnoDB default charset=utf8mb4;
+-- 插入数据
+insert into user_exp values (1,'李四'),(2,'李五'),(3,'王五'),(4,'张三');
+```
+
+执行：
+
+```sql
+explain select * from user where name like '%五';
+```
+
+打印结果为：
+
+```
+id|select_type|table|partitions|type|possible_keys|key|key_len|ref|rows|filtered|Extra      |
+--+-----------+-----+----------+----+-------------+---+-------+---+----+--------+-----------+
+ 1|SIMPLE     |user |          |ALL |             |   |       |   |   4|    25.0|Using where|
+```
+
+执行：
+
+```sql
+explain select id,name from user where name like '%五';
+```
+
+结果：
+
+```
+id|select_type|table|partitions|type |possible_keys|key     |key_len|ref|rows|filtered|Extra                   |
+--+-----------+-----+----------+-----+-------------+--------+-------+---+----+--------+------------------------+
+ 1|SIMPLE     |user |          |index|             |idx_name|83     |   |   4|    25.0|Using where; Using index|
+```
+
+执行：
+
+```sql
+explain select id,name from user where user_exp like '%五';
+explain select * from user where user_exp like '%五';
+```
+
+两个的结果均为：
+
+```
+id|select_type|table   |partitions|type |possible_keys|key     |key_len|ref|rows|filtered|Extra                   |
+--+-----------+--------+----------+-----+-------------+--------+-------+---+----+--------+------------------------+
+ 1|SIMPLE     |user_exp|          |index|             |idx_name|83     |   |   4|    25.0|Using where; Using index|
+```
+
+对于上面的例子，首先我们需要查询的 `id`、` name` 这两个字段都在我们的辅助索引中，叶子节点存的索引值和主键值，所以我们只要查辅助索引就可以直接拿到我们的需要的结果了，那么这个叫做索引|覆盖。我们观察执行计划会发现它的查询级别是 index，其实也是全表遍历了辅助索引。
+
+对于第一个例子，查询的是所有字段，而`card`字段不在辅助索引中，如果遍历辅助索引，则还需要回标，效率远没有直接遍历高。
