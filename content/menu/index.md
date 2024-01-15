@@ -8,3 +8,4 @@ headless = true
     - [事务]({{< relref "/docs/database/mysql/trans" >}})
     - [null值存储]({{< relref "/docs/database/mysql/null_storage" >}})
     - [常见面试题]({{< relref "/docs/database/mysql/normal" >}})
+- [Java]({{< relref "/docs/java" >}})

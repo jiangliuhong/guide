@@ -1,6 +1,6 @@
 baseURL = 'https://guide.jiangliuhong.top/'
 languageCode = 'zh-cn'
-title = '面试集锦'
+title = '复习吧'
 theme = 'hugo-book'
 enableGitInfo = true
 [params]
