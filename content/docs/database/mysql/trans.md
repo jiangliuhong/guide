@@ -155,7 +155,7 @@ update undo log记录了数据之前的数据信息，通过这些信息可以�
 
 进行删除修改操作时，会生成对应的undo log，并将当前数据记录中的db_roll_ptr指向新的undo log。
 
-<img src="https://jlhblog.oss-cn-beijing.aliyuncs.com/images/2024/1/171705458677618.png" alt="171705458677618.png" style="zoom:50%;" />
+![](https://static.jiangliuhong.top/images/2024/1/171705458677618.png)
 
 ### ReadView
 
@@ -169,7 +169,7 @@ ReadView中主要就是有个列表来存储我们系统中当前活跃着的读
 
 **trx_ids**：为活跃事务id列表，即Read View初始化时当前未提交的事务列表。所以当进行RR读的时候，trx_ids中的事务对于本事务是不可见的（除了自身事务，自身事务对于表的修改对于自己当然是可见的）。理解起来就是创建RV时，将当前活跃事务ID记录下来，后续即使他们提交对于本事务也是不可见的。
 
-![171705459074838.png](https://jlhblog.oss-cn-beijing.aliyuncs.com/images/2024/1/171705459074838.png)
+![171705459074838.png](https://static.jiangliuhong.top/images/2024/1/171705459074838.png)
 
 假如存在表user，其中数据如下：
 
@@ -187,17 +187,17 @@ update user set name = 'MVCC2' where id = 1;
 
 此时undo log存在版本链如下:
 
-<img src="https://jlhblog.oss-cn-beijing.aliyuncs.com/images/2024/1/171705459412621.png" alt="171705459412621.png" style="zoom:50%;" />
+![](https://static.jiangliuhong.top/images/2024/1/171705459412621.png)
 
 提交事务id是60的记录后，接着有一个事务id为100的事务，修改name=MVCC3，但是事务还没提交。则此时的版本链是：
 
-<img src="https://jlhblog.oss-cn-beijing.aliyuncs.com/images/2024/1/171705459527113.png" alt="171705459527113.png" style="zoom:50%;" />
+![](https://static.jiangliuhong.top/images/2024/1/171705459527113.png)
 
 此时另一个事务发起select语句查询id=1的记录，因为trx_ids当前只有事务id为100的，所以该条记录不可见，继续查询下一条，发现trx_id=60的事务号小于up_limit_id，则可见，直接返回结果`MVCC2`。
 
 那这时候我们把事务id为100的事务提交了，并且新建了一个事务id为110也修改id为1的记录name=MVCC4，并且不提交事务。这时候版本链就是：
 
-<img src="https://jlhblog.oss-cn-beijing.aliyuncs.com/images/2024/1/171705459659779.png" alt="171705459659779.png" style="zoom:50%;" />
+![](https://static.jiangliuhong.top/images/2024/1/171705459659779.png)
 
 这时候之前那个select事务又执行了一次查询,要查询id为1的记录。
 

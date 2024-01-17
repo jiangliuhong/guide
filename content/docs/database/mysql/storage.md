@@ -174,15 +174,23 @@ id|name|phone| age |
 
 对于第一条记录，所有列都有值，不存在 NULL 值，所以用二进制来表示如下图所示：
 
-<img src="https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null1.png" style="zoom: 50%;" />
+![](https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null1.png)
 
-但是 InnoDB 是用整数字节的二进制位来表示 NULL 值列表的，现在不足 8 位，所以要在高位补 0，最终用二进制来表示是下面这样的：<img src="https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null2.png" style="zoom:50%;" />
+但是 InnoDB 是用整数字节的二进制位来表示 NULL 值列表的，现在不足 8 位，所以要在高位补 0，最终用二进制来表示是下面这样的：
 
-下面来看第二条记录， age 列是 NULL 值，所以，对于第二条数据，NULL值列表用十六进制表示是 0x04。<img src="https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null3.png" style="zoom:50%;" />
+![](https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null2.png)
 
-最后第三条记录， phone 列 和 age 列是 NULL 值，所以，对于第三条数据，NULL 值列表用十六进制表示是 0x06。<img src="https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null4.png" style="zoom:50%;" />
+下面来看第二条记录， age 列是 NULL 值，所以，对于第二条数据，NULL值列表用十六进制表示是 0x04。
 
-当三条记录的 NULL 值列表都填充完毕后，它们的行格式最终是这样的：![](https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null5.png)
+![](https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null3.png)
+
+最后第三条记录， phone 列 和 age 列是 NULL 值，所以，对于第三条数据，NULL 值列表用十六进制表示是 0x06。
+
+![](https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null4.png)
+
+当三条记录的 NULL 值列表都填充完毕后，它们的行格式最终是这样的：
+
+![](https://static.jiangliuhong.top/images/2024/1/15mysql_compact_null5.png)
 
 ### 记录的真实数据
 
@@ -193,7 +201,7 @@ id|name|phone| age |
 
 - roll_pointer:这条记录上一个版本的指针。roll_pointer 是必需的，占用 7 个字节。
 
-<img src="https://static.jiangliuhong.top/images/2024/1/16mysql_compact_real.png" alt="16mysql_compact_real.png" style="zoom:50%;" />
+![16mysql_compact_real.png](https://static.jiangliuhong.top/images/2024/1/16mysql_compact_real.png)
 
 其中trx_id 和 roll_pointer主要在MVCC 机制中起作用：[MVCC机制](../trans#mvcc机制)
 
@@ -205,7 +213,7 @@ MySQL 中磁盘和内存交互的基本单位是页，一个页的大小一般�
 
 当发生行溢出时，在记录的真实数据处只会保存该列的一部分数据，而把剩余的数据放在「溢出页」中，然后真实数据处用 20 字节存储指向溢出页的地址，从而可以找到剩余数据所在的页。大致如下图所示。
 
-<img src="https://static.jiangliuhong.top/images/2024/1/16mysql_row.png" alt="16mysql_row.png" style="zoom:50%;" />
+![16mysql_row.png](https://static.jiangliuhong.top/images/2024/1/16mysql_row.png)
 
 上面这个是 Compact 行格式在发生行溢出后的处理。
 
@@ -213,7 +221,7 @@ Compressed 和 Dynamic 这两个行格式和 Compact 非常类似，主要的区
 
 这两种格式采用完全的行溢出方式，记录的真实数据处不会存储该列的一部分数据，只存储 20 个字节的指针来指向溢出页。而实际的数据都存储在溢出页中，看起来就像下面这样：
 
-<img src="https://static.jiangliuhong.top/images/2024/1/16mysql_row2.png" alt="16mysql_row2.png" style="zoom:50%;" />
+![16mysql_row2.png](https://static.jiangliuhong.top/images/2024/1/16mysql_row2.png)
 
 
 

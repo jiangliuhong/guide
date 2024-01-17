@@ -112,7 +112,7 @@ B+ 树是由 B 树演变的，是使用文件系统使用的数据结构：
 
 
 
-<img src="https://static.jiangliuhong.top/images/2024/1/21704179867555.png" alt="MySQL 架构" style="zoom:50%;" />
+![MySQL 架构](https://static.jiangliuhong.top/images/2024/1/21704179867555.png)
 
 - MySQL 服务层：也就是 SERVER 层，用来解析 SQL 的语法、语义、生成查询计划、接管从 MySQL 存储引/擎层上推的数据进行二次过滤等等。
 - MySQL 存储引擎层：按照 MySQL 服务层下发的请求，通过索引或者全表扫描等方式把数据上传到MySQL 服务层。
