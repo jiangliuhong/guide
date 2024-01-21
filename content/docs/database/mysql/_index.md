@@ -5,6 +5,7 @@ draft = false
 
 +++
 
-# Mysql
+# MySQL
 
-TODO : 一个大致的导读
+![MySQL思维导图](
+https://static.jiangliuhong.top/images/my/xmind-MySQL.png)
