@@ -7,6 +7,7 @@ headless = true
     - [索引]({{< relref "/docs/database/mysql/indexes" >}})
     - [事务]({{< relref "/docs/database/mysql/trans" >}})
     - [数据存储]({{< relref "/docs/database/mysql/storage" >}})
+    - [集群]({{< relref "/docs/database/mysql/cluster" >}})
     - [常见面试题]({{< relref "/docs/database/mysql/normal" >}})
   - NOSQL 数据库
     - [Redis]({{< relref "/docs/database/redis" >}})
