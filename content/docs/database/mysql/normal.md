@@ -9,7 +9,86 @@ draft = false
 
 ### 百万级大数据分页查询
 
-TODO
+首先模拟一张100万条记录的表：
+
+```sql
+-- 创建表
+CREATE TABLE IF NOT EXISTS sys_app
+(
+    id          varchar(32)  not null,
+    name        VARCHAR(30)  NOT NULL unique,
+    title       VARCHAR(200) NOT NULL,
+    create_time datetime,
+    update_time datetime,
+    create_user varchar(32),
+    update_user varchar(32),
+    PRIMARY KEY (id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8;
+
+-- 插入数据
+INSERT INTO sys_app (id, name, title, create_time, update_time, create_user, update_user)
+SELECT REPLACE(UUID(), '-', ''), 
+       CONCAT('App', CAST(@counter := @counter + 1 AS CHAR(10))), 
+       CONCAT('Title', FLOOR(RAND() * 1000000)), 
+       NOW(), 
+       NOW(), 
+       'admin', 
+       'admin'
+FROM (SELECT NULL) AS dummy
+JOIN (SELECT @counter := 0) AS init
+CROSS JOIN (
+    SELECT a.N + b.N * 10 + c.N * 100 + d.N * 1000 + e.N * 10000 + f.N * 100000 + g.N * 1000000 AS num
+    FROM (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS a
+    CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS b
+    CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS c
+    CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS d
+    CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS e
+    CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS f
+    CROSS JOIN (SELECT 0 AS N UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) AS g
+) AS nums
+LIMIT 10000000;
+
+```
+
+执行一次深分页查询：
+```
+select * from sys_app where name like 'App1%' limit  999999,10 ;
+```
+耗时： 1 s 228 ms
+
+优化一：基于索引再排序
+
+利用MySQL支持ORDER操作可以利用索引快速定位部分元组,避免全表扫描
+
+```sql
+select * from sys_app where id in (select id from (select id from sys_app where name like 'App1%' order by id limit 999999,10 ) t )
+```
+
+耗时：607 ms
+
+如果id是自增id,同时也没有额外的查询条件，也可以使用下面的方式：
+
+```sql
+select * from sys_app table WHERE id>=10000 ORDER BY id ASC LIMIT 0,20
+```
+
+对于有额外查询条件，需要对额外查询条件增加索引此方法才能生效
+
+优化二：利用子查询/连接+索引快速定位元组的位置,然后再读取元组.
+
+```sql
+SELECT a.* FROM sys_app a JOIN (select id from sys_app limit 999999,10) b ON a.id = b.id
+```
+耗时：135 ms
+
+补充总结：
+- mysql数据表记录数超过几十万时，使用limit进行分页，性能会比较差
+- mysql推荐使用自增id作为数据表的主键，不要使用uuid作为数据表的主键
+- mysql表的索引会影响查询的默认排序，并不绝对是按主键排序
+- 分布式情况下推荐使用带时间属性的自增长id(分布式自增长id算法)
+
+参考：[https://www.jianshu.com/p/029070a3ca83](https://www.jianshu.com/p/029070a3ca83)
 
 ### MySQL 怎么知道 varchar(n) 实际占用数据的大小
 
