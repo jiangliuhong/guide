@@ -7,4 +7,4 @@ draft = false
 
 # Redis
 
-TODO
+![redis](https://static.jiangliuhong.top/images/my/xmind-Redis.png)
