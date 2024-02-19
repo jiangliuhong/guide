@@ -116,6 +116,8 @@ n/2、n/4、n/8、第 k 级索引结点的个数就是 n/(2^k)
 
 ### 用java实现跳表
 
+[参考链接](https://developer.aliyun.com/article/858584#slide-15)
+
 ```java
 import java.util.concurrent.ThreadLocalRandom;
 
