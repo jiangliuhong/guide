@@ -19,3 +19,5 @@ headless = true
 - [Java]({{< relref "/docs/java" >}})
 - 算法
   - [数据结构]({{< relref "/docs/arithmetic/data" >}})
+- 中间件
+  - [消息队列]({{< relref "/docs/middleware/messagequeue" >}})

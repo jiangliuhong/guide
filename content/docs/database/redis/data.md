@@ -367,15 +367,109 @@ QUEUED
 
 ### 对象机制
 
-TODO
+在redis中，为了完成对不同类型的键值进行不同的操作，所以redis必须让每个键都带有类型信息，使得程序可以检查键的类型，从而选择合适的处理方式。例如，redis在处理集合类型的时候，集合类型可以由字段和整数集合两种不同的数据结构实现，当用户执行ZADD命令时，无需用户关心集合的底层实现，由redis本身选择合适的方法进行处理。
 
-redisObject
+即：操作苏剧类型的命令处理要对键的类型进行检查以外，还需要多根据类型的不同编码（不同的底层结构）进行多态处理。
 
-对象共享
+redis为了实现上面的内容，构建了自己的类型系统，主要包括：
+- redisObject对象
+- 基于redisObject对象的类型检查
+- 基于redisObject对象的显式多态函数
+- 对redisObject进行分配、共享和销毁的机制
 
-对象淘汰
+
+参考链接：[https://redisbook.readthedocs.io/en/latest/datatype/object.html](https://redisbook.readthedocs.io/en/latest/datatype/object.html)
+
+#### redisObject
+
+redisObject 是 Redis 类型系统的核心， 数据库中的每个键、值，以及 Redis 本身处理的参数， 都表示为这种数据类型。
+
+在redis6.0中，redisObject的应用如下：
+
+![211708480761905.png](https://static.jiangliuhong.top/images/2024/2/211708480761905.png)
+
+从上图可以看出，redis没中对象都是由redisObject与对应编码的数据结构组合而成，而没中对象类型对应若干编码方式，不同的编码凡事所对应的底层数据结构也不同。
+
+在redis中，redisObject的结构为：
+
+```
+typedef struct redisObject {
+
+    // 类型
+    unsigned type:4;
+
+    // 编码方式
+    unsigned encoding:4;
+
+    // LRU - 24位, 记录最末一次访问时间（相对于lru_clock）; 或者 LFU（最少使用的数据：8位频率，16位访问时间）
+    unsigned lru:LRU_BITS; // LRU_BITS: 24
+
+    // 引用计数
+    int refcount;
+
+    // 指向底层数据结构实例
+    void *ptr;
+
+} robj;
+```
+
+type 、 encoding 和 ptr 是最重要的三个属性。
+
+type 记录了对象所保存的值的类型，它的值可能是以下常量的其中一个：
+
+```
+#define REDIS_STRING 0  // 字符串
+#define REDIS_LIST 1    // 列表
+#define REDIS_SET 2     // 集合
+#define REDIS_ZSET 3    // 有序集
+#define REDIS_HASH 4    // 哈希表
+```
+
+encoding 记录了对象所保存的值的编码，它的值可能是以下常量的其中一个:
+
+```
+#define REDIS_ENCODING_RAW 0            // 编码为字符串
+#define REDIS_ENCODING_INT 1            // 编码为整数
+#define REDIS_ENCODING_HT 2             // 编码为哈希表
+#define REDIS_ENCODING_ZIPMAP 3         // 编码为 zipmap
+#define REDIS_ENCODING_LINKEDLIST 4     // 编码为双端链表
+#define REDIS_ENCODING_ZIPLIST 5        // 编码为压缩列表
+#define REDIS_ENCODING_INTSET 6         // 编码为整数集合
+#define REDIS_ENCODING_SKIPLIST 7       // 编码为跳跃表
+```
+
+ptr 是一个指针，指向实际保存值的数据结构，这个数据结构由 type 属性和 encoding 属性决定。
+
+
+lru记录了对象最后一次被命令程序访问的时间。如果服务器开启了maxmemory选项，并且服务器用于回收的算法为volatile-lru或者allkeys-lru，那么当服务器占用的内存数超过了maxmemory选项所设置的上限值时，空转时长较高的那部分键会优先被服务器释放，从而回收内存。
+
+#### 对象共享
+
+redis一般会把一些常见的值放到一个共享对象中，这样可使程序避免了重复分配的麻烦，也节约了一些CPU时间。
+
+redis预分配的值对象如下：
+
+- 各种命令的返回值，比如成功时返回的OK，错误时返回的ERROR，命令入队事务时返回的QUEUE，等等
+- 包括0 在内，小于REDIS_SHARED_INTEGERS的所有整数（REDIS_SHARED_INTEGERS的默认值是10000
+
+![211708482633510.png](https://static.jiangliuhong.top/images/2024/2/211708482633510.png)
+
+共享对象只能被字典和双向链表这类能带有指针的数据结构使用。像整数集合和压缩列表这些只能保存字符串、整数等自勉之的内存数据结构
+
+#### 对象淘汰
+
+在redisObject中存在refcount属性，是对象的引用基数，如果显示为 0 则代表此对象是可以回收的。
+
+- 每个redisObject结构都带有一个refcount属性，指示这个对象被引用了多少次；
+- 当新创建一个对象时，它的refcount属性被设置为1；
+- 当对一个对象进行共享时，redis将这个对象的refcount加一；
+- 当使用完一个对象后，或者消除对一个对象的引用之后，程序将对象的refcount减一；
+- 当对象的refcount降至0 时，这个RedisObject结构，以及它引用的数据结构的内存都会被释放。
+
 
 ### 底层数据结构
 
-TODO
+在上文中提到，redis的底层数据结构主要有：SDS 简单动态字符串、QuickList 快表、ZipList 压缩列表、HasTable 哈希表、InSet 整数集、ZSkipList 跳表。
+
+详细的说明参考：[https://pdai.tech/md/db/nosql-redis/db-redis-x-redis-ds.html](https://pdai.tech/md/db/nosql-redis/db-redis-x-redis-ds.html)
 
