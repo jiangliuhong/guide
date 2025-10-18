@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  数据结构
+  #
+
+
+  数据类型
+  #
+
+
+  5种基本类型
+  #
+
+5 种常见的基本类型有：String、List、Set、Zset、Hash
+
+  
+      
+          类型
+          存储的值
+          读写能力
+      
+  
+  
+      
+          String
+          字符串、整数或浮点数
+          对整个字符串或字符串的一部分进行操作；对整数或者浮点数进行自增或自减操作
+      
+      
+          List
+          链表，链表每个节点都是一个字符串
+          对链表的两端进行push和pop操作，读取单个或者多个元素；根据值查找或删除元素
+      
+      
+          Set
+          字符串的无序集合
+          字符串的集合，基础操作有添加、删除、获取；同时还有计算交集、并集、差集等
+      
+      
+          Hash
+          包含键值对的无序散列表
+          基本方法有添加、获取、删除单个元素方法
+      
+      
+          Zset
+          与Hash相同，用于存储键值对
+          字符串成员与浮点数之间的有序映射，元素的排列顺序由分数的大小决定；基本方法有添加、获取、删除单个元素以及根据分数范围或成员来获取元素
+      
+  
+
+
+  String
+  #
+
+String是redis中最基本的数据类型，一个key对应一个value。
+String类型是二进制安全的，意思是 redis 的 string 可以包含任何数据。如数字，字符串，jpg图片或者序列化的对象。
+String类型的常用操作有：
+
+  
+      
+          命令
+          简述
+          使用
+      
+  
+  
+      
+          GET
+          获取存储在给定键中的值
+          GET name
+      
+      
+          SET
+          设置存储在给定键中的值
+          SET name value
+      
+      
+          DEL
+          删除存储在给定键中的值
+          DEL name
+      
+      
+          INCR
+          将键存储的值加1
+          INCR key
+      
+      
+          DECR
+          将键存储的值减1
+          DECR key
+      
+      
+          INCRBY
+          将键存储的值加上整数
+          INCRBY key amount
+      
+      
+          DECRBY
+          将键存储的值减去整数
+          DECRBY key amount
+      
+  
+
+更加详细的string操作参考：https://www.redis.net.cn/order/3544.html">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/docs/database/redis/data/">
+  <meta property="og:site_name" content="复习吧">
+  <meta property="og:title" content="Redis数据结构">
+  <meta property="og:description" content="数据结构 # 数据类型 # 5种基本类型 # 5 种常见的基本类型有：String、List、Set、Zset、Hash
+类型 存储的值 读写能力 String 字符串、整数或浮点数 对整个字符串或字符串的一部分进行操作；对整数或者浮点数进行自增或自减操作 List 链表，链表每个节点都是一个字符串 对链表的两端进行push和pop操作，读取单个或者多个元素；根据值查找或删除元素 Set 字符串的无序集合 字符串的集合，基础操作有添加、删除、获取；同时还有计算交集、并集、差集等 Hash 包含键值对的无序散列表 基本方法有添加、获取、删除单个元素方法 Zset 与Hash相同，用于存储键值对 字符串成员与浮点数之间的有序映射，元素的排列顺序由分数的大小决定；基本方法有添加、获取、删除单个元素以及根据分数范围或成员来获取元素 String # String是redis中最基本的数据类型，一个key对应一个value。
+String类型是二进制安全的，意思是 redis 的 string 可以包含任何数据。如数字，字符串，jpg图片或者序列化的对象。
+String类型的常用操作有：
+命令 简述 使用 GET 获取存储在给定键中的值 GET name SET 设置存储在给定键中的值 SET name value DEL 删除存储在给定键中的值 DEL name INCR 将键存储的值加1 INCR key DECR 将键存储的值减1 DECR key INCRBY 将键存储的值加上整数 INCRBY key amount DECRBY 将键存储的值减去整数 DECRBY key amount 更加详细的string操作参考：https://www.redis.net.cn/order/3544.html">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+    <meta property="article:published_time" content="2024-02-18T11:53:59+08:00">
+    <meta property="article:modified_time" content="2024-02-21T10:48:17+08:00">
+<title>Redis数据结构 | 复习吧</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" >
+<link rel="stylesheet" href="/book.min.cdf2dd29f013b9b416743e9529e3db831a1462598e2803454998241de8e37466.css" integrity="sha256-zfLdKfATubQWdD6VKePbgxoUYlmOKANFSZgkHejjdGY=" crossorigin="anonymous">
+  <script defer src="/flexsearch.min.js"></script>
+  <script defer src="/en.search.min.80ca7f71d8159d5795f243152f289067a8e79866a78fb2aad41736a324b0b3da.js" integrity="sha256-gMp/cdgVnVeV8kMVLyiQZ6jnmGanj7Kq1Bc2oySws9o=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>复习吧</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  <ul>
+<li>数据库
+<ul>
+<li><a href="/docs/database/mysql/">MySQL</a>
+<ul>
+<li><a href="/docs/database/mysql/indexes/">索引</a></li>
+<li><a href="/docs/database/mysql/trans/">事务</a></li>
+<li><a href="/docs/database/mysql/storage/">数据存储</a></li>
+<li><a href="/docs/database/mysql/cluster/">集群</a></li>
+<li><a href="/docs/database/mysql/normal/">常见面试题</a></li>
+</ul>
+</li>
+<li>NOSQL 数据库
+<ul>
+<li><a href="/docs/database/redis/">Redis</a>
+<ul>
+<li><a href="/docs/database/redis/base/">基础概念</a></li>
+<li><a href="/docs/database/redis/data/"class=active>数据结构</a></li>
+<li><a href="/docs/database/redis/high/">高可用</a></li>
+<li><a href="/docs/database/redis/apply/">应用实践</a></li>
+</ul>
+</li>
+<li><a href="/docs/database/es/">ElastiSearch</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="/docs/java/">Java</a></li>
+<li>算法
+<ul>
+<li><a href="/docs/arithmetic/data/">数据结构</a></li>
+</ul>
+</li>
+<li>中间件
+<ul>
+<li><a href="/docs/middleware/messagequeue/">消息队列</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>Redis数据结构</strong>
+
+  <label for="toc-control">
+    
+    <img src="/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#数据类型">数据类型</a>
+      <ul>
+        <li><a href="#5种基本类型">5种基本类型</a>
+          <ul>
+            <li><a href="#string">String</a></li>
+            <li><a href="#list">List</a></li>
+            <li><a href="#set">Set</a></li>
+            <li><a href="#hash">Hash</a></li>
+            <li><a href="#zset">Zset</a></li>
+          </ul>
+        </li>
+        <li><a href="#3种特殊类型">3种特殊类型</a>
+          <ul>
+            <li><a href="#hyperloglogs基数统计">HyperLogLogs（基数统计）</a></li>
+            <li><a href="#bitmaps-位图">Bitmaps (位图)</a></li>
+            <li><a href="#geospatial地理位置">geospatial（地理位置）</a></li>
+          </ul>
+        </li>
+        <li><a href="#stream类型">stream类型</a>
+          <ul>
+            <li><a href="#常用命令">常用命令</a></li>
+            <li><a href="#结构组成">结构组成</a></li>
+            <li><a href="#独立消费">独立消费</a></li>
+            <li><a href="#消费组消费">消费组消费</a></li>
+            <li><a href="#信息监控">信息监控</a></li>
+            <li><a href="#相关问题">相关问题</a>
+              <ul>
+                <li><a href="#使用场景">使用场景</a></li>
+                <li><a href="#消息id的设计是否考虑了时间回拨的问题">消息ID的设计是否考虑了时间回拨的问题</a></li>
+                <li><a href="#消费者崩溃带来的会不会消息丢失问题">消费者崩溃带来的会不会消息丢失问题</a></li>
+                <li><a href="#消息转移">消息转移</a></li>
+                <li><a href="#死信问题">死信问题</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#对象机制">对象机制</a>
+          <ul>
+            <li><a href="#redisobject">redisObject</a></li>
+            <li><a href="#对象共享">对象共享</a></li>
+            <li><a href="#对象淘汰">对象淘汰</a></li>
+          </ul>
+        </li>
+        <li><a href="#底层数据结构">底层数据结构</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="数据结构">
+  数据结构
+  <a class="anchor" href="#%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84">#</a>
+</h1>
+<h2 id="数据类型">
+  数据类型
+  <a class="anchor" href="#%e6%95%b0%e6%8d%ae%e7%b1%bb%e5%9e%8b">#</a>
+</h2>
+<h3 id="5种基本类型">
+  5种基本类型
+  <a class="anchor" href="#5%e7%a7%8d%e5%9f%ba%e6%9c%ac%e7%b1%bb%e5%9e%8b">#</a>
+</h3>
+<p>5 种常见的基本类型有：String、List、Set、Zset、Hash</p>
+<table>
+  <thead>
+      <tr>
+          <th>类型</th>
+          <th>存储的值</th>
+          <th>读写能力</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>String</td>
+          <td>字符串、整数或浮点数</td>
+          <td>对整个字符串或字符串的一部分进行操作；对整数或者浮点数进行自增或自减操作</td>
+      </tr>
+      <tr>
+          <td>List</td>
+          <td>链表，链表每个节点都是一个字符串</td>
+          <td>对链表的两端进行push和pop操作，读取单个或者多个元素；根据值查找或删除元素</td>
+      </tr>
+      <tr>
+          <td>Set</td>
+          <td>字符串的无序集合</td>
+          <td>字符串的集合，基础操作有添加、删除、获取；同时还有计算交集、并集、差集等</td>
+      </tr>
+      <tr>
+          <td>Hash</td>
+          <td>包含键值对的无序散列表</td>
+          <td>基本方法有添加、获取、删除单个元素方法</td>
+      </tr>
+      <tr>
+          <td>Zset</td>
+          <td>与Hash相同，用于存储键值对</td>
+          <td>字符串成员与浮点数之间的有序映射，元素的排列顺序由分数的大小决定；基本方法有添加、获取、删除单个元素以及根据分数范围或成员来获取元素</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="string">
+  String
+  <a class="anchor" href="#string">#</a>
+</h4>
+<p>String是redis中最基本的数据类型，一个key对应一个value。</p>
+<p>String类型是二进制安全的，意思是 redis 的 string 可以包含任何数据。如数字，字符串，jpg图片或者序列化的对象。</p>
+<p>String类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>GET</td>
+          <td>获取存储在给定键中的值</td>
+          <td>GET name</td>
+      </tr>
+      <tr>
+          <td>SET</td>
+          <td>设置存储在给定键中的值</td>
+          <td>SET name value</td>
+      </tr>
+      <tr>
+          <td>DEL</td>
+          <td>删除存储在给定键中的值</td>
+          <td>DEL name</td>
+      </tr>
+      <tr>
+          <td>INCR</td>
+          <td>将键存储的值加1</td>
+          <td>INCR key</td>
+      </tr>
+      <tr>
+          <td>DECR</td>
+          <td>将键存储的值减1</td>
+          <td>DECR key</td>
+      </tr>
+      <tr>
+          <td>INCRBY</td>
+          <td>将键存储的值加上整数</td>
+          <td>INCRBY key amount</td>
+      </tr>
+      <tr>
+          <td>DECRBY</td>
+          <td>将键存储的值减去整数</td>
+          <td>DECRBY key amount</td>
+      </tr>
+  </tbody>
+</table>
+<p>更加详细的string操作参考：<a href="https://www.redis.net.cn/order/3544.html">https://www.redis.net.cn/order/3544.html</a></p>
+<p>string的常用场景：</p>
+<ul>
+<li>缓存：把常用信息，字符串，图片或者视频等信息放到redis中，redis作为缓存层，mysql做持久化层，降低mysql的读写压力</li>
+<li>计数器：redis是单线程模型，一个命令执行完才会执行下一个，同时数据可以一步落地到其他的数据源。</li>
+<li>session：常见方案spring session + redis实现session共享，</li>
+</ul>
+<h4 id="list">
+  List
+  <a class="anchor" href="#list">#</a>
+</h4>
+<p>List是redis中的链表，在redis中是使用双端链表实现的。</p>
+<p>使用List结构，我们可以轻松地实现最新消息排队功能（比如新浪微博的TimeLine）。</p>
+<p>List的另一个应用就是消息队列，可以利用List的 PUSH 操作，将任务存放在List中，然后工作线程再用 POP 操作将任务取出进行执行。</p>
+<p>List类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>RPUSH</td>
+          <td>将给定值推入到列表右端</td>
+          <td>RPUSH key value</td>
+      </tr>
+      <tr>
+          <td>LPUSH</td>
+          <td>将给定值推入到列表左端</td>
+          <td>LPUSH key value</td>
+      </tr>
+      <tr>
+          <td>RPOP</td>
+          <td>从列表的右端弹出一个值，并返回被弹出的值</td>
+          <td>RPOP key</td>
+      </tr>
+      <tr>
+          <td>LPOP</td>
+          <td>从列表的左端弹出一个值，并返回被弹出的值</td>
+          <td>LPOP key</td>
+      </tr>
+      <tr>
+          <td>LRANGE</td>
+          <td>获取列表在给定范围上的所有值</td>
+          <td>LRANGE key 0 -1</td>
+      </tr>
+      <tr>
+          <td>LINDEX</td>
+          <td>通过索引获取列表中的元素。你也可以使用负数下标，以 -1 表示列表的最后一个元素， -2 表示列表的倒数第二个元素，以此类推。</td>
+          <td>LINDEX key index</td>
+      </tr>
+      <tr>
+          <td>LTRIM</td>
+          <td>让列表只保留指定区间内的元素，不在指定区间之内的元素都将被删除</td>
+          <td>LTRIM KEY_NAME START STOP</td>
+      </tr>
+      <tr>
+          <td>BRPOP</td>
+          <td>移出并获取列表的最后一个元素， 如果列表没有元素会阻塞列表直到等待超时或发现可弹出元素为止</td>
+          <td>BRPOP LIST1 LIST2 .. LISTN TIMEOUT</td>
+      </tr>
+  </tbody>
+</table>
+<p>更加详细的list操作参考：<a href="https://www.redis.net.cn/order/3577.html">https://www.redis.net.cn/order/3577.html</a></p>
+<p>使用技巧：</p>
+<ul>
+<li>作为桟使用：lpush + lpop</li>
+<li>作为队列使用：lpush + rpop</li>
+<li>作为有限集合使用：lpush + ltrim</li>
+<li>作为消息队列使用：lpoush + brpop</li>
+</ul>
+<p>list的常用场景：</p>
+<ul>
+<li>微博TimeLine: 有人发布微博，用lpush加入时间轴，展示新的列表信息。</li>
+<li>消息队列</li>
+</ul>
+<h4 id="set">
+  Set
+  <a class="anchor" href="#set">#</a>
+</h4>
+<p>Redis 的 Set 是 String 类型的无序集合。集合成员是唯一的，这就意味着集合中不能出现重复的数据。</p>
+<p>Redis 中集合是通过哈希表实现的，所以添加，删除，查找的复杂度都是 O(1)。</p>
+<p>Set类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>SADD</td>
+          <td>向集合添加一个或多个成员</td>
+          <td>SADD key value</td>
+      </tr>
+      <tr>
+          <td>SCARD</td>
+          <td>获取集合的成员数</td>
+          <td>SCARD key</td>
+      </tr>
+      <tr>
+          <td>SMEMBERS</td>
+          <td>返回集合中的所有成员</td>
+          <td>SMEMBERS key member</td>
+      </tr>
+      <tr>
+          <td>SISMEMBER</td>
+          <td>判断 member 元素是否是集合 key 的成员</td>
+          <td>SISMEMBER key member</td>
+      </tr>
+  </tbody>
+</table>
+<p>更加详细的set操作参考：<a href="https://www.redis.net.cn/order/3594.html">https://www.redis.net.cn/order/3594.html</a></p>
+<p>set的常用场景：</p>
+<ul>
+<li>标签（tag）,给用户添加标签，或者用户给消息添加标签，这样有同一标签或者类似标签的可以给推荐关注的事或者关注的人。</li>
+<li>点赞，或点踩，收藏等，可以放到set中实现</li>
+</ul>
+<h4 id="hash">
+  Hash
+  <a class="anchor" href="#hash">#</a>
+</h4>
+<p>Redis hash 是一个 string 类型的 field（字段） 和 value（值） 的映射表，hash 特别适合用于存储对象。</p>
+<p>hash类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>HSET</td>
+          <td>添加键值对</td>
+          <td>HSET hash-key sub-key1 value1</td>
+      </tr>
+      <tr>
+          <td>HGET</td>
+          <td>获取指定散列键的值</td>
+          <td>HGET hash-key key1</td>
+      </tr>
+      <tr>
+          <td>HGETALL</td>
+          <td>获取散列中包含的所有键值对</td>
+          <td>HGETALL hash-key</td>
+      </tr>
+      <tr>
+          <td>HDEL</td>
+          <td>如果给定键存在于散列中，那么就移除这个键</td>
+          <td>HDEL hash-key sub-key1</td>
+      </tr>
+  </tbody>
+</table>
+<p>hash 主要是和维护对象信息，使缓存数据更加直观，同时也不string更节省空间。</p>
+<p>更加详细的hash操作参考：<a href="https://www.redis.net.cn/order/3564.html">https://www.redis.net.cn/order/3564.html</a></p>
+<h4 id="zset">
+  Zset
+  <a class="anchor" href="#zset">#</a>
+</h4>
+<p>Redis 有序集合和集合一样也是 string 类型元素的集合,且不允许重复的成员。</p>
+<p>不同的是每个元素都会关联一个 double 类型的分数。redis 正是通过分数来为集合中的成员进行从小到大的排序。</p>
+<p>有序集合的成员是唯一的, 但分数(score)却可以重复。有序集合是通过两种数据结构实现：</p>
+<ul>
+<li>压缩列表（ziplist）:为了提高存储效率而设计的一种特殊编码的双向链表。它可以存储字符串或者整数，存储整数时是采用整数的二进制而不是字符串形式存储。它能在O(1)的时间复杂度下完成list两端的push和pop操作。但是因为每次操作都需要重新分配ziplist的内存，所以实际复杂度和ziplist的内存使用量相关。<a href="../../../arithmetic/data/#%e5%8e%8b%e7%bc%a9%e5%88%97%e8%a1%a8ziplist">详细说明</a></li>
+<li>跳跃表（zSkiplist）:跳跃表的性能可以保证在查找，删除，添加等操作的时候在对数期望时间内完成，这个性能是可以和平衡树来相比较的，而且在实现方面比平衡树要优雅，这是采用跳跃表的主要原因。跳跃表的复杂度是O(log(n))。<a href="../../../arithmetic/data/#%e8%b7%b3%e8%b7%83%e8%a1%a8zskiplist">详细说明</a></li>
+</ul>
+<p>zset类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>ZADD</td>
+          <td>将一个带有给定分值的成员添加到有序集合里面</td>
+          <td>ZADD zset-key 178 member1</td>
+      </tr>
+      <tr>
+          <td>ZRANGE</td>
+          <td>根据元素在有序集合中所处的位置，从有序集合中获取多个元素</td>
+          <td>ZRANGE zset-key 0-1 withccores</td>
+      </tr>
+      <tr>
+          <td>ZREM</td>
+          <td>如果给定元素成员存在于有序集合中，那么就移除这个元素</td>
+          <td>ZREM zset-key member1</td>
+      </tr>
+  </tbody>
+</table>
+<p>更加详细的zset操作参考：<a href="https://www.redis.net.cn/order/3609.html">https://www.redis.net.cn/order/3609.html</a></p>
+<h3 id="3种特殊类型">
+  3种特殊类型
+  <a class="anchor" href="#3%e7%a7%8d%e7%89%b9%e6%ae%8a%e7%b1%bb%e5%9e%8b">#</a>
+</h3>
+<p>redis的三种特殊的数据类型，分别是 HyperLogLogs（基数统计）， Bitmaps (位图) 和 geospatial （地理位置）。</p>
+<h4 id="hyperloglogs基数统计">
+  HyperLogLogs（基数统计）
+  <a class="anchor" href="#hyperloglogs%e5%9f%ba%e6%95%b0%e7%bb%9f%e8%ae%a1">#</a>
+</h4>
+<p>在redis 2.8.9 版本新增了HyperLogLogs数据结构</p>
+<p>HyperLogLogs可以非常省内存的去做统计计数，比如注册 IP 数、每日访问 IP 数、页面实时 UC、在线用户数，共同好友数等。</p>
+<p>例如要对于一个网站的访问数进行统计，假如每天访问的 IP 有 100 万，一个 IP 消耗 15 字节，那么 100 万个 IP 就是 15M。而使用HyperLogLogs 在redis中每个键咱用的内容都是 12K，理论上存储近视 2^64 个值，不管存储的内容是什么，它基于基数估算的算法，可以使用少量固定的内存去识别集合中的唯一元素。</p>
+<p>需要注意的是，这个估算并不是完全准确的，它拥有0.81%的误差，当然对于一些允许容错的业务场景，这个误差是可以忽略不计的。</p>
+<p>HyperLogLogs类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>PFMERGE</td>
+          <td>将多个 HyperLogLog 合并为一个 HyperLogLog ，合并后的 HyperLogLog 的基数估算值是通过对所有 给定 HyperLogLog 进行并集计算得出的。</td>
+          <td>PFMERGE destkey sourcekey [sourcekey &hellip;]</td>
+      </tr>
+      <tr>
+          <td>PFADD</td>
+          <td>将所有元素参数添加到 HyperLogLog 数据结构中</td>
+          <td>PFADD key element [element &hellip;]</td>
+      </tr>
+      <tr>
+          <td>PFCOUNT</td>
+          <td>返回给定 HyperLogLog 的基数估算值</td>
+          <td>PFCOUNT key [key &hellip;]</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="bitmaps-位图">
+  Bitmaps (位图)
+  <a class="anchor" href="#bitmaps-%e4%bd%8d%e5%9b%be">#</a>
+</h4>
+<p>Bitmap 即位图数据结构，都是操作二进制位来进行记录，只有0 和 1 两个状态。</p>
+<p>常用来存储统计信息，例如统计用户的登录状态、考勤系统记录员工的打卡状态等。</p>
+<p>bitmap类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>setbit</td>
+          <td>设置值</td>
+          <td>setbit key num  1/0</td>
+      </tr>
+      <tr>
+          <td>getbit</td>
+          <td>获取值</td>
+          <td>getbit key num</td>
+      </tr>
+      <tr>
+          <td>bitcount</td>
+          <td>位统计，获取值为 1 的个数</td>
+          <td>bitcount key</td>
+      </tr>
+  </tbody>
+</table>
+<h4 id="geospatial地理位置">
+  geospatial（地理位置）
+  <a class="anchor" href="#geospatial%e5%9c%b0%e7%90%86%e4%bd%8d%e7%bd%ae">#</a>
+</h4>
+<p>Redis 的 Geo 在 Redis 3.2 版本就推出了! 这个功能可以推算地理位置的信息: 两地之间的距离, 方圆几里的人</p>
+<p>geospatial类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>GEOHASH</td>
+          <td>返回一个或多个位置的hash值,如果字符串越接近则距离越近</td>
+          <td>GEOHASH Sicily Palermo Catania</td>
+      </tr>
+      <tr>
+          <td>GEOPOS</td>
+          <td>从key里返回所有给定位置元素的位置（经度和纬度）</td>
+          <td>GEOPOS Sicily Palermo Catania NonExisting</td>
+      </tr>
+      <tr>
+          <td>GEODIST</td>
+          <td>返回两个给定位置之间的距离</td>
+          <td>GEODIST Sicily Palermo Catania [km/mi]</td>
+      </tr>
+      <tr>
+          <td>GEORADIUS</td>
+          <td>以给定的经纬度为中心,找出某一半径内的元素</td>
+          <td>GEORADIUS Sicily 15 37 200 km WITHCOORD</td>
+      </tr>
+      <tr>
+          <td>GEOADD</td>
+          <td>将指定的地理空间位置（纬度、经度、名称）添加到指定的key中</td>
+          <td>GEOADD Sicily 13.361389 38.115556 &ldquo;Palermo&rdquo;</td>
+      </tr>
+      <tr>
+          <td>GEORADIUSBYMEMBER</td>
+          <td>指定成员的位置被用作查询的中心,找出位于指定范围内的元素</td>
+          <td>GEORADIUSBYMEMBER Sicily Agrigento 100 km</td>
+      </tr>
+  </tbody>
+</table>
+<h3 id="stream类型">
+  stream类型
+  <a class="anchor" href="#stream%e7%b1%bb%e5%9e%8b">#</a>
+</h3>
+<p>stream类型是在redis5.0中新增的，它借鉴了kafka的设计，是redis一个新的、强大的支持多播的可持久化的消息队列。</p>
+<p>在 redis5.0 之前，基于redis实现消息队列的方法都存在一些弊端，比如：</p>
+<ul>
+<li>PUB/SUB 发布订阅模式，无法持久化，如果出现网络问题、redis服务宕机问题，消息则会丢失</li>
+<li>List LPUSH + BRPOP 或者 Sorted-Set 的实现，虽然支持了持久化，但是不支持多播、分组消费等</li>
+</ul>
+<p>在redis新增stream类型后，基于此类型实现消息队列，虽然并不能实现一个完全体的消息队列，但也能做到一个轻量级的实践，可以满足的需求有：</p>
+<ul>
+<li>消息持久化</li>
+<li>消息的基本增删改查操作</li>
+<li>单播、多播、组播</li>
+<li>监控消息状态</li>
+</ul>
+<h4 id="常用命令">
+  常用命令
+  <a class="anchor" href="#%e5%b8%b8%e7%94%a8%e5%91%bd%e4%bb%a4">#</a>
+</h4>
+<p>stream类型的常用操作有：</p>
+<table>
+  <thead>
+      <tr>
+          <th>命令</th>
+          <th>简述</th>
+          <th>使用</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td>XADD</td>
+          <td>添加消息到末尾</td>
+          <td>XADD key ID field string [field string &hellip;]</td>
+      </tr>
+      <tr>
+          <td>XGROUP</td>
+          <td>管理流数据结构关联的消费者组</td>
+          <td>XGROUP CREATE mystream consumer-group-name</td>
+      </tr>
+      <tr>
+          <td>XTRIM</td>
+          <td>对消息进行修剪，限制长度</td>
+          <td>XTRIM key MAXLEN [~] count</td>
+      </tr>
+      <tr>
+          <td>XDEL</td>
+          <td>删除消息</td>
+          <td>XDEL key ID [ID &hellip;]</td>
+      </tr>
+      <tr>
+          <td>XLEN</td>
+          <td>获取消息长度</td>
+          <td>xlen key</td>
+      </tr>
+      <tr>
+          <td>XRANGE</td>
+          <td>获取消息列表，自动过滤已经删除的消息</td>
+          <td>XRANGE key start end [COUNT count]</td>
+      </tr>
+      <tr>
+          <td>XREVRANGE</td>
+          <td>反向获取消息列表</td>
+          <td>XREVRANGE key end start [COUNT count]</td>
+      </tr>
+      <tr>
+          <td>XREAD</td>
+          <td>以阻塞或非阻塞方式获取消息列表</td>
+          <td>XREAD [COUNT count] [BLOCK milliseconds] STREAMS key [key &hellip;] ID [ID &hellip;]</td>
+      </tr>
+  </tbody>
+</table>
+<p>使用range命令时，可以用 - 表示最小值,用 + 表示最大值</p>
+<p>XGROUP的作用主要有：</p>
+<ul>
+<li>创建与流关联的新消费者组。</li>
+<li>销毁一个消费者组。</li>
+<li>从消费者组中移除指定的消费者。</li>
+<li>将消费者组的最后交付ID设置为其他内容。</li>
+</ul>
+<p>更加消息的命令说明参考：<a href="http://www.redis.cn/commands/xadd.html">http://www.redis.cn/commands/xadd.html</a></p>
+<h4 id="结构组成">
+  结构组成
+  <a class="anchor" href="#%e7%bb%93%e6%9e%84%e7%bb%84%e6%88%90">#</a>
+</h4>
+<p>对于 stream 类型，每个 stream 都有唯一的名称，它就是 Redis 的 key，在我们首次使用 xadd 指令追加消息时自动创建。</p>
+<p><img src="https://static.jiangliuhong.top/images/2024/2/201708393308442.png" alt="201708393308442.png" /></p>
+<p>如图所示，可以清晰的看见，当我们使用stream类型构建消息队列，主要有 3 个要点：</p>
+<ul>
+<li>consumer group:消费组，使用 <code>XGROUP CREATE</code>命令创建，一个消费组有多个消费者（Consumer），这些消费者彼此之间属于竞争关系</li>
+<li>last_delivered_id:游标，每个消费组会有一个游标last_delivered_id,任意一个消费者读取了消息都会使游标last_delivered_id往前移动</li>
+<li>pending_ids:消费者的状态变量，作用是维护消费者的未确认的id，记录当前已经被客户端读取的消息，但还没有ack(被确认的标记)</li>
+</ul>
+<p>另外，在使用stream结构构建消息队列时，还需要注意：</p>
+<ul>
+<li>消息 ID：消息 ID 的形式是timestampInMillis-sequence，例如1527846880572-5，它表示当前的消息在毫米时间戳1527846880572时产生，并且是该毫秒内产生的第5条消息。消息ID可以由服务器自动生成，也可以由客户端自己指定，但是形式必须是整数-整数，而且必须是后面加入的消息的ID要大于前面的消息ID。</li>
+<li>消息内容：消息内容就是键值对，比如hash结构的键值对。</li>
+</ul>
+<h4 id="独立消费">
+  独立消费
+  <a class="anchor" href="#%e7%8b%ac%e7%ab%8b%e6%b6%88%e8%b4%b9">#</a>
+</h4>
+<p>上面提到的均为针对消费组的情况下进行消费，而strem类型也支持独立消费，redis提供了单独的消费指令 —— XREAD。</p>
+<p>使用xread时，我们可以完全忽略消费组(Consumer Group)的存在，就好比Stream就是一个普通的列表(list)。</p>
+<p>使用xread时，客户端如果想要使用xread进行顺序消费，一定要记住当前消费到哪里了，也就是返回的消息ID。下次继续调用xread时，将上次返回的最后一个消息ID作为参数传递进去，就可以继续消费后续的消息。</p>
+<p>xread的参数，block 0表示永远阻塞，直到消息到来，block 1000表示阻塞1s，如果1s内没有任何消息到来，就返回nil，使用示例：</p>
+<ul>
+<li>从Stream头部读取两条消息：xread count 2 streams codehole 0-0</li>
+<li>从Stream尾部读取一条消息，毫无疑问，这里不会返回任何消息：xread count 1 streams codehole $</li>
+<li>从尾部阻塞等待新消息到来，下面的指令会堵住，直到新消息到来：xread block 0 count 1 streams codehole $</li>
+<li>我们从新打开一个窗口，在这个窗口往Stream里塞消息：xadd codehole * name youming age 60</li>
+</ul>
+<h4 id="消费组消费">
+  消费组消费
+  <a class="anchor" href="#%e6%b6%88%e8%b4%b9%e7%bb%84%e6%b6%88%e8%b4%b9">#</a>
+</h4>
+<p>消费组相关的命令：</p>
+<ul>
+<li>XGROUP CREATE - 创建消费者组</li>
+<li>XREADGROUP GROUP - 读取消费者组中的消息</li>
+<li>XACK - 将消息标记为&quot;已处理&quot;</li>
+<li>XGROUP SETID - 为消费者组设置新的最后递送消息ID</li>
+<li>XGROUP DELCONSUMER - 删除消费者</li>
+<li>XGROUP DESTROY - 删除消费者组</li>
+<li>XPENDING - 显示待处理消息的相关信息</li>
+<li>XCLAIM - 转移消息的归属权</li>
+<li>XINFO - 查看流和消费者组的相关信息；</li>
+<li>XINFO GROUPS - 打印消费者组的信息；</li>
+<li>XINFO STREAM - 打印流信息</li>
+</ul>
+<h4 id="信息监控">
+  信息监控
+  <a class="anchor" href="#%e4%bf%a1%e6%81%af%e7%9b%91%e6%8e%a7">#</a>
+</h4>
+<p>使用 XINFO 命令可以对stream进行监控：</p>
+<ul>
+<li>监控队列信息：xinfo stream mq</li>
+<li>监控组信息：xinfo groups mq</li>
+<li>监控消费组成员信息：xinfo consumers mq mqGroup</li>
+</ul>
+<h4 id="相关问题">
+  相关问题
+  <a class="anchor" href="#%e7%9b%b8%e5%85%b3%e9%97%ae%e9%a2%98">#</a>
+</h4>
+<h5 id="使用场景">
+  使用场景
+  <a class="anchor" href="#%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af">#</a>
+</h5>
+<ul>
+<li>通信</li>
+<li>大数据分析</li>
+<li>异地数据备份</li>
+</ul>
+<h5 id="消息id的设计是否考虑了时间回拨的问题">
+  消息ID的设计是否考虑了时间回拨的问题
+  <a class="anchor" href="#%e6%b6%88%e6%81%afid%e7%9a%84%e8%ae%be%e8%ae%a1%e6%98%af%e5%90%a6%e8%80%83%e8%99%91%e4%ba%86%e6%97%b6%e9%97%b4%e5%9b%9e%e6%8b%a8%e7%9a%84%e9%97%ae%e9%a2%98">#</a>
+</h5>
+<p>XADD生成的1553439850328-0，就是Redis生成的消息ID，由两部分组成:时间戳-序号。时间戳是毫秒级单位，是生成消息的Redis服务器时间，它是个64位整型（int64）。序号是在这个毫秒时间点内的消息序号，它也是个64位整型</p>
+<p>可以通过multi批处理，来验证序号的递增：</p>
+<pre tabindex="0"><code>127.0.0.1:6379&gt; MULTI
+OK
+127.0.0.1:6379&gt; XADD memberMessage * msg one
+QUEUED
+127.0.0.1:6379&gt; XADD memberMessage * msg two
+QUEUED
+127.0.0.1:6379&gt; XADD memberMessage * msg three
+QUEUED
+127.0.0.1:6379&gt; XADD memberMessage * msg four
+QUEUED
+127.0.0.1:6379&gt; XADD memberMessage * msg five
+QUEUED
+127.0.0.1:6379&gt; EXEC
+1) &#34;1553441006884-0&#34;
+2) &#34;1553441006884-1&#34;
+3) &#34;1553441006884-2&#34;
+4) &#34;1553441006884-3&#34;
+5) &#34;1553441006884-4&#34;
+</code></pre><p>由于一个redis命令的执行很快，所以可以看到在同一时间戳内，是通过序号递增来表示消息的。为了保证消息是有序的，因此Redis生成的ID是单调递增有序的。由于ID中包含时间戳部分，为了避免服务器时间错误而带来的问题（例如服务器时间延后了），Redis的每个Stream类型数据都维护一个latest_generated_id属性，用于记录最后一个消息的ID。若发现当前时间戳退后（小于latest_generated_id所记录的），则采用时间戳不变而序号递增的方案来作为新消息ID（这也是序号为什么使用int64的原因，保证有足够多的的序号），从而保证ID的单调递增性质。</p>
+<h5 id="消费者崩溃带来的会不会消息丢失问题">
+  消费者崩溃带来的会不会消息丢失问题
+  <a class="anchor" href="#%e6%b6%88%e8%b4%b9%e8%80%85%e5%b4%a9%e6%ba%83%e5%b8%a6%e6%9d%a5%e7%9a%84%e4%bc%9a%e4%b8%8d%e4%bc%9a%e6%b6%88%e6%81%af%e4%b8%a2%e5%a4%b1%e9%97%ae%e9%a2%98">#</a>
+</h5>
+<p>为了解决组内消息读取但处理期间消费者崩溃带来的消息丢失问题，STREAM 设计了 Pending 列表，用于记录读取但并未处理完毕的消息。命令XPENDIING 用来获消费组或消费内消费者的未处理完毕的消息</p>
+<p>每个Pending的消息有4个属性：</p>
+<ul>
+<li>消息ID</li>
+<li>所属消费者</li>
+<li>IDLE，已读取时长</li>
+<li>delivery counter，消息被读取次数</li>
+</ul>
+<p>当消费者下线后再次上线，可以读取该Pending列表，就可以继续处理该消息了，保证消息的有序和不丢失。</p>
+<h5 id="消息转移">
+  消息转移
+  <a class="anchor" href="#%e6%b6%88%e6%81%af%e8%bd%ac%e7%a7%bb">#</a>
+</h5>
+<p>消息转移即：消费者彻底宕机后转移给其它消费者处理，需要转移的有两个，一个是未消费的消息转移，一个是将宕机的消费者的 Pending消息转移。</p>
+<p>在redis中，可使用  XCLAIM 命令，指定组、消费者、消息 ID 以及 IDLE（以被读取时长，只有超过这个时长，才能被转移），然后就可将这些消息转移到新的消费者的Pending列表中。</p>
+<h5 id="死信问题">
+  死信问题
+  <a class="anchor" href="#%e6%ad%bb%e4%bf%a1%e9%97%ae%e9%a2%98">#</a>
+</h5>
+<p>如果某个消息，不能被消费者处理，也就是不能被XACK，这是要长时间处于Pending列表中，即使被反复的转移给各个消费者也是如此。此时该消息的delivery counter就会累加，当累加到某个我们预设的临界值时，我们就认为是坏消息（也叫死信，DeadLetter，无法投递的消息），由于有了判定条件，我们将坏消息处理掉即可，删除即可。删除一个消息，使用XDEL语法，演示如下：</p>
+<pre tabindex="0"><code># 删除队列中的消息
+127.0.0.1:6379&gt; XDEL mq 1553585533795-1
+(integer) 1
+# 查看队列中再无此消息
+127.0.0.1:6379&gt; XRANGE mq - +
+1) 1) &#34;1553585533795-0&#34;
+   2) 1) &#34;msg&#34;
+      2) &#34;1&#34;
+2) 1) &#34;1553585533795-2&#34;
+   2) 1) &#34;msg&#34;
+      2) &#34;3&#34;
+</code></pre><h3 id="对象机制">
+  对象机制
+  <a class="anchor" href="#%e5%af%b9%e8%b1%a1%e6%9c%ba%e5%88%b6">#</a>
+</h3>
+<p>在redis中，为了完成对不同类型的键值进行不同的操作，所以redis必须让每个键都带有类型信息，使得程序可以检查键的类型，从而选择合适的处理方式。例如，redis在处理集合类型的时候，集合类型可以由字段和整数集合两种不同的数据结构实现，当用户执行ZADD命令时，无需用户关心集合的底层实现，由redis本身选择合适的方法进行处理。</p>
+<p>即：操作苏剧类型的命令处理要对键的类型进行检查以外，还需要多根据类型的不同编码（不同的底层结构）进行多态处理。</p>
+<p>redis为了实现上面的内容，构建了自己的类型系统，主要包括：</p>
+<ul>
+<li>redisObject对象</li>
+<li>基于redisObject对象的类型检查</li>
+<li>基于redisObject对象的显式多态函数</li>
+<li>对redisObject进行分配、共享和销毁的机制</li>
+</ul>
+<p>参考链接：<a href="https://redisbook.readthedocs.io/en/latest/datatype/object.html">https://redisbook.readthedocs.io/en/latest/datatype/object.html</a></p>
+<h4 id="redisobject">
+  redisObject
+  <a class="anchor" href="#redisobject">#</a>
+</h4>
+<p>redisObject 是 Redis 类型系统的核心， 数据库中的每个键、值，以及 Redis 本身处理的参数， 都表示为这种数据类型。</p>
+<p>在redis6.0中，redisObject的应用如下：</p>
+<p><img src="https://static.jiangliuhong.top/images/2024/2/211708480761905.png" alt="211708480761905.png" /></p>
+<p>从上图可以看出，redis没中对象都是由redisObject与对应编码的数据结构组合而成，而没中对象类型对应若干编码方式，不同的编码凡事所对应的底层数据结构也不同。</p>
+<p>在redis中，redisObject的结构为：</p>
+<pre tabindex="0"><code>typedef struct redisObject {
+
+    // 类型
+    unsigned type:4;
+
+    // 编码方式
+    unsigned encoding:4;
+
+    // LRU - 24位, 记录最末一次访问时间（相对于lru_clock）; 或者 LFU（最少使用的数据：8位频率，16位访问时间）
+    unsigned lru:LRU_BITS; // LRU_BITS: 24
+
+    // 引用计数
+    int refcount;
+
+    // 指向底层数据结构实例
+    void *ptr;
+
+} robj;
+</code></pre><p>type 、 encoding 和 ptr 是最重要的三个属性。</p>
+<p>type 记录了对象所保存的值的类型，它的值可能是以下常量的其中一个：</p>
+<pre tabindex="0"><code>#define REDIS_STRING 0  // 字符串
+#define REDIS_LIST 1    // 列表
+#define REDIS_SET 2     // 集合
+#define REDIS_ZSET 3    // 有序集
+#define REDIS_HASH 4    // 哈希表
+</code></pre><p>encoding 记录了对象所保存的值的编码，它的值可能是以下常量的其中一个:</p>
+<pre tabindex="0"><code>#define REDIS_ENCODING_RAW 0            // 编码为字符串
+#define REDIS_ENCODING_INT 1            // 编码为整数
+#define REDIS_ENCODING_HT 2             // 编码为哈希表
+#define REDIS_ENCODING_ZIPMAP 3         // 编码为 zipmap
+#define REDIS_ENCODING_LINKEDLIST 4     // 编码为双端链表
+#define REDIS_ENCODING_ZIPLIST 5        // 编码为压缩列表
+#define REDIS_ENCODING_INTSET 6         // 编码为整数集合
+#define REDIS_ENCODING_SKIPLIST 7       // 编码为跳跃表
+</code></pre><p>ptr 是一个指针，指向实际保存值的数据结构，这个数据结构由 type 属性和 encoding 属性决定。</p>
+<p>lru记录了对象最后一次被命令程序访问的时间。如果服务器开启了maxmemory选项，并且服务器用于回收的算法为volatile-lru或者allkeys-lru，那么当服务器占用的内存数超过了maxmemory选项所设置的上限值时，空转时长较高的那部分键会优先被服务器释放，从而回收内存。</p>
+<h4 id="对象共享">
+  对象共享
+  <a class="anchor" href="#%e5%af%b9%e8%b1%a1%e5%85%b1%e4%ba%ab">#</a>
+</h4>
+<p>redis一般会把一些常见的值放到一个共享对象中，这样可使程序避免了重复分配的麻烦，也节约了一些CPU时间。</p>
+<p>redis预分配的值对象如下：</p>
+<ul>
+<li>各种命令的返回值，比如成功时返回的OK，错误时返回的ERROR，命令入队事务时返回的QUEUE，等等</li>
+<li>包括0 在内，小于REDIS_SHARED_INTEGERS的所有整数（REDIS_SHARED_INTEGERS的默认值是10000</li>
+</ul>
+<p><img src="https://static.jiangliuhong.top/images/2024/2/211708482633510.png" alt="211708482633510.png" /></p>
+<p>共享对象只能被字典和双向链表这类能带有指针的数据结构使用。像整数集合和压缩列表这些只能保存字符串、整数等自勉之的内存数据结构</p>
+<h4 id="对象淘汰">
+  对象淘汰
+  <a class="anchor" href="#%e5%af%b9%e8%b1%a1%e6%b7%98%e6%b1%b0">#</a>
+</h4>
+<p>在redisObject中存在refcount属性，是对象的引用基数，如果显示为 0 则代表此对象是可以回收的。</p>
+<ul>
+<li>每个redisObject结构都带有一个refcount属性，指示这个对象被引用了多少次；</li>
+<li>当新创建一个对象时，它的refcount属性被设置为1；</li>
+<li>当对一个对象进行共享时，redis将这个对象的refcount加一；</li>
+<li>当使用完一个对象后，或者消除对一个对象的引用之后，程序将对象的refcount减一；</li>
+<li>当对象的refcount降至0 时，这个RedisObject结构，以及它引用的数据结构的内存都会被释放。</li>
+</ul>
+<h3 id="底层数据结构">
+  底层数据结构
+  <a class="anchor" href="#%e5%ba%95%e5%b1%82%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84">#</a>
+</h3>
+<p>在上文中提到，redis的底层数据结构主要有：SDS 简单动态字符串、QuickList 快表、ZipList 压缩列表、HasTable 哈希表、InSet 整数集、ZSkipList 跳表。</p>
+<p>详细的说明参考：<a href="https://pdai.tech/md/db/nosql-redis/db-redis-x-redis-ds.html">https://pdai.tech/md/db/nosql-redis/db-redis-x-redis-ds.html</a></p>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#数据类型">数据类型</a>
+      <ul>
+        <li><a href="#5种基本类型">5种基本类型</a>
+          <ul>
+            <li><a href="#string">String</a></li>
+            <li><a href="#list">List</a></li>
+            <li><a href="#set">Set</a></li>
+            <li><a href="#hash">Hash</a></li>
+            <li><a href="#zset">Zset</a></li>
+          </ul>
+        </li>
+        <li><a href="#3种特殊类型">3种特殊类型</a>
+          <ul>
+            <li><a href="#hyperloglogs基数统计">HyperLogLogs（基数统计）</a></li>
+            <li><a href="#bitmaps-位图">Bitmaps (位图)</a></li>
+            <li><a href="#geospatial地理位置">geospatial（地理位置）</a></li>
+          </ul>
+        </li>
+        <li><a href="#stream类型">stream类型</a>
+          <ul>
+            <li><a href="#常用命令">常用命令</a></li>
+            <li><a href="#结构组成">结构组成</a></li>
+            <li><a href="#独立消费">独立消费</a></li>
+            <li><a href="#消费组消费">消费组消费</a></li>
+            <li><a href="#信息监控">信息监控</a></li>
+            <li><a href="#相关问题">相关问题</a>
+              <ul>
+                <li><a href="#使用场景">使用场景</a></li>
+                <li><a href="#消息id的设计是否考虑了时间回拨的问题">消息ID的设计是否考虑了时间回拨的问题</a></li>
+                <li><a href="#消费者崩溃带来的会不会消息丢失问题">消费者崩溃带来的会不会消息丢失问题</a></li>
+                <li><a href="#消息转移">消息转移</a></li>
+                <li><a href="#死信问题">死信问题</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+        <li><a href="#对象机制">对象机制</a>
+          <ul>
+            <li><a href="#redisobject">redisObject</a></li>
+            <li><a href="#对象共享">对象共享</a></li>
+            <li><a href="#对象淘汰">对象淘汰</a></li>
+          </ul>
+        </li>
+        <li><a href="#底层数据结构">底层数据结构</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

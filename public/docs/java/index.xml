@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on 复习吧</title>
+    <link>http://localhost:1313/docs/java/</link>
+    <description>Recent content in Java on 复习吧</description>
+    <generator>Hugo</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 05 Mar 2024 11:53:59 +0800</lastBuildDate>
+    <atom:link href="http://localhost:1313/docs/java/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>jvm</title>
+      <link>http://localhost:1313/docs/java/jvm/</link>
+      <pubDate>Tue, 05 Mar 2024 11:53:59 +0800</pubDate>
+      <guid>http://localhost:1313/docs/java/jvm/</guid>
+      <description>&lt;h1 id=&#34;jvm&#34;&gt;&#xA;  jvm&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#jvm&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h1&gt;&#xA;&lt;h2 id=&#34;jvm-调优&#34;&gt;&#xA;  jvm 调优&#xA;  &lt;a class=&#34;anchor&#34; href=&#34;#jvm-%e8%b0%83%e4%bc%98&#34;&gt;#&lt;/a&gt;&#xA;&lt;/h2&gt;</description>
+    </item>
+  </channel>
+</rss>

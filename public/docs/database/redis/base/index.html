@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="
+  Redis基础概念
+  #
+
+Redis是一款内存高速缓存数据库。Redis全称为：Remote Dictionary Server（远程数据服务），使用C语言编写，Redis是一个key-value存储系统（键值存储系统），支持丰富的数据类型，如：String、list、set、zset、hash。Redis是一种支持key-value等多种数据结构的存储系统。可用于缓存，事件发布或订阅，高速队列等场景。支持网络，提供字符串，哈希，列表，队列，集合结构直接存取，基于内存，可持久化。
+
+  为什么要使用redis
+  #
+
+使用redis主要基于其性能与并发的特点。
+比如一个执行耗时久并且结果变动不频繁的SQL，可以尝试将结果放到缓存中，使得请求可以快速响应。
+再比如一个并发很大的功能，如果每次都从数据库获取数据，由于数据库响应问题，可能会出现连接异常，照成响应失败，这时可以将数据放在redis种，提高响应速度，降低数据库压力。
+当然，redis除了性能与并发，也存在其他特点，现将这些特点总结如下：
+
+读写性能优异：Redis能读的速度是110000次/s,写的速度是81000次/s
+数据类型丰富：Redis支持二进制案例的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作
+原子性：Redis的所有操作都是原子性的，同时Redis还支持对几个操作全并后的原子性执行
+发布订阅：Redis支持发布/订阅模式
+持久化：Redis支持RDB, AOF等持久化方式
+支持分布式部署
+
+
+  redis为什么响应快
+  #
+
+redis响应快的主要因素有：
+
+redis是基于内存的，读写都在内存中进行
+redis是单线程的，不存在上下文切换线程
+redis采用多路复用IO,可以处理并发连接
+非阻塞IO内部实现采用epoll，采用了epoll&#43;自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间。
+数据结构优化，redis为key-value的存储，使用hash结构，读写速度快；对于特殊的数据类型也引入了特殊的数据结构进行优化，比如使用跳表加快有序的数据结构(比如zset)的读取速度
+
+
+  redis为什么是单线程
+  #
+
+因为Redis是基于内存的操作，CPU不是Redis的瓶颈，Redis的瓶颈最有可能是机器内存的大小或者网络带宽。既然单线程容易实现，而且CPU不会成为瓶颈，那就顺理成章地采用单线程的方案了。
+
+不需要各种锁的性能消耗
+
+redis的数据结构并不全是简单的Key-Value，还有list，hash等复杂的结构，这些结构有可能会进行很细粒度的操作，比如在很长的列表后面添加一个元素，在hash当中添加或者删除
+一个对象。这些操作可能就需要加非常多的锁，导致的结果是同步开销大大增加。
+总之，在单线程的情况下，就不用去考虑各种锁的问题，不存在加锁释放锁操作，没有因为可能出现死锁而导致的性能消耗。
+
+单线程多进程集群方案
+
+单线程的威力实际上非常强大，每核心效率也非常高，多线程自然是可以比单线程有更高的性能上限，但是在今天的计算环境中，即使是单机多线程的上限也往往不能满足需要了，需要进一步摸索的是多服务器集群化的方案，这些方案中多线程的技术照样是用不上的。
+所以单线程、多进程的集群不失为一个时髦的解决方案。
+
+CPU消耗
+
+采用单线程，避免了不必要的上下文切换和竞争条件，也不存在多进程或者多线程导致的切换而消耗 CPU。但是如果CPU成为Redis瓶颈，或者不想让服务器其他CUP核闲置，那怎么办?可以考虑多起几个Redis进程，Redis是key-value数据库，不是关系数据库，数据之间没有约束。只要客户端分清哪些key放在哪个Redis进程上就可以了。
+
+  什么是多路复用 IO
+  #
+
+Redis单线程的优劣势单进程单线程优势代码更清晰，处理逻辑更简单不用去考虑各种锁的问题，不存在加锁释放锁操作，不会因为可能出现死锁而导致的性能消耗，不存在多进程或者多线程导致的切换而消耗CPU
+不过在单线程下无法发挥多核CPU性能，于是redis引入多路复用 IO 方案来保证多连接时的系统吞吐量。
+其中：
+
+多路：指的是多个socket连接，即多个网络连接
+复用：指的是复用一个线程
+
+多路复用主要有三种技术：select，poll，epoll。redi采用的是epoll。
+采用多路 IO 复用技术可以让单个线程高效的处理多个连接请求(尽量减少网络IO的时间消耗)，且Redis在内存中操作数据的速度非常快(内存内的操作不会成为这里的性能瓶颈)，主要以上两点造就了Redis具有很高的吞吐量。
+在redis中，所有的接收到的请求，都会由单线程来处理（多路复用 IO），而这个单线程并不会立即处理，而是所有的命令都会进入一个 Socket 队列中，当 socket 可读则交给单线程事件分发器逐个被执行。">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#343a40">
+<meta name="color-scheme" content="light dark"><meta property="og:url" content="http://localhost:1313/docs/database/redis/base/">
+  <meta property="og:site_name" content="复习吧">
+  <meta property="og:title" content="Redis基础概念">
+  <meta property="og:description" content="Redis基础概念 # Redis是一款内存高速缓存数据库。Redis全称为：Remote Dictionary Server（远程数据服务），使用C语言编写，Redis是一个key-value存储系统（键值存储系统），支持丰富的数据类型，如：String、list、set、zset、hash。Redis是一种支持key-value等多种数据结构的存储系统。可用于缓存，事件发布或订阅，高速队列等场景。支持网络，提供字符串，哈希，列表，队列，集合结构直接存取，基于内存，可持久化。
+为什么要使用redis # 使用redis主要基于其性能与并发的特点。
+比如一个执行耗时久并且结果变动不频繁的SQL，可以尝试将结果放到缓存中，使得请求可以快速响应。
+再比如一个并发很大的功能，如果每次都从数据库获取数据，由于数据库响应问题，可能会出现连接异常，照成响应失败，这时可以将数据放在redis种，提高响应速度，降低数据库压力。
+当然，redis除了性能与并发，也存在其他特点，现将这些特点总结如下：
+读写性能优异：Redis能读的速度是110000次/s,写的速度是81000次/s 数据类型丰富：Redis支持二进制案例的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作 原子性：Redis的所有操作都是原子性的，同时Redis还支持对几个操作全并后的原子性执行 发布订阅：Redis支持发布/订阅模式 持久化：Redis支持RDB, AOF等持久化方式 支持分布式部署 redis为什么响应快 # redis响应快的主要因素有：
+redis是基于内存的，读写都在内存中进行 redis是单线程的，不存在上下文切换线程 redis采用多路复用IO,可以处理并发连接 非阻塞IO内部实现采用epoll，采用了epoll&#43;自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间。 数据结构优化，redis为key-value的存储，使用hash结构，读写速度快；对于特殊的数据类型也引入了特殊的数据结构进行优化，比如使用跳表加快有序的数据结构(比如zset)的读取速度 redis为什么是单线程 # 因为Redis是基于内存的操作，CPU不是Redis的瓶颈，Redis的瓶颈最有可能是机器内存的大小或者网络带宽。既然单线程容易实现，而且CPU不会成为瓶颈，那就顺理成章地采用单线程的方案了。
+不需要各种锁的性能消耗 redis的数据结构并不全是简单的Key-Value，还有list，hash等复杂的结构，这些结构有可能会进行很细粒度的操作，比如在很长的列表后面添加一个元素，在hash当中添加或者删除 一个对象。这些操作可能就需要加非常多的锁，导致的结果是同步开销大大增加。
+总之，在单线程的情况下，就不用去考虑各种锁的问题，不存在加锁释放锁操作，没有因为可能出现死锁而导致的性能消耗。
+单线程多进程集群方案 单线程的威力实际上非常强大，每核心效率也非常高，多线程自然是可以比单线程有更高的性能上限，但是在今天的计算环境中，即使是单机多线程的上限也往往不能满足需要了，需要进一步摸索的是多服务器集群化的方案，这些方案中多线程的技术照样是用不上的。
+所以单线程、多进程的集群不失为一个时髦的解决方案。
+CPU消耗 采用单线程，避免了不必要的上下文切换和竞争条件，也不存在多进程或者多线程导致的切换而消耗 CPU。但是如果CPU成为Redis瓶颈，或者不想让服务器其他CUP核闲置，那怎么办?可以考虑多起几个Redis进程，Redis是key-value数据库，不是关系数据库，数据之间没有约束。只要客户端分清哪些key放在哪个Redis进程上就可以了。
+什么是多路复用 IO # Redis单线程的优劣势单进程单线程优势代码更清晰，处理逻辑更简单不用去考虑各种锁的问题，不存在加锁释放锁操作，不会因为可能出现死锁而导致的性能消耗，不存在多进程或者多线程导致的切换而消耗CPU
+不过在单线程下无法发挥多核CPU性能，于是redis引入多路复用 IO 方案来保证多连接时的系统吞吐量。
+其中：
+多路：指的是多个socket连接，即多个网络连接 复用：指的是复用一个线程 多路复用主要有三种技术：select，poll，epoll。redi采用的是epoll。
+采用多路 IO 复用技术可以让单个线程高效的处理多个连接请求(尽量减少网络IO的时间消耗)，且Redis在内存中操作数据的速度非常快(内存内的操作不会成为这里的性能瓶颈)，主要以上两点造就了Redis具有很高的吞吐量。
+在redis中，所有的接收到的请求，都会由单线程来处理（多路复用 IO），而这个单线程并不会立即处理，而是所有的命令都会进入一个 Socket 队列中，当 socket 可读则交给单线程事件分发器逐个被执行。">
+  <meta property="og:locale" content="zh_cn">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="docs">
+    <meta property="article:published_time" content="2024-02-14T11:53:59+08:00">
+    <meta property="article:modified_time" content="2024-02-20T10:49:00+08:00">
+<title>Redis基础概念 | 复习吧</title>
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/favicon.png" >
+<link rel="stylesheet" href="/book.min.cdf2dd29f013b9b416743e9529e3db831a1462598e2803454998241de8e37466.css" integrity="sha256-zfLdKfATubQWdD6VKePbgxoUYlmOKANFSZgkHejjdGY=" crossorigin="anonymous">
+  <script defer src="/flexsearch.min.js"></script>
+  <script defer src="/en.search.min.80ca7f71d8159d5795f243152f289067a8e79866a78fb2aad41736a324b0b3da.js" integrity="sha256-gMp/cdgVnVeV8kMVLyiQZ6jnmGanj7Kq1Bc2oySws9o=" crossorigin="anonymous"></script>
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+  
+</head>
+<body dir="ltr">
+  <input type="checkbox" class="hidden toggle" id="menu-control" />
+  <input type="checkbox" class="hidden toggle" id="toc-control" />
+  <main class="container flex">
+    <aside class="book-menu">
+      <div class="book-menu-content">
+        
+  <nav>
+<h2 class="book-brand">
+  <a class="flex align-center" href="/"><span>复习吧</span>
+  </a>
+</h2>
+
+
+<div class="book-search">
+  <input type="text" id="book-search-input" placeholder="Search" aria-label="Search" maxlength="64" data-hotkeys="s/" />
+  <div class="book-search-spinner hidden"></div>
+  <ul id="book-search-results"></ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  <ul>
+<li>数据库
+<ul>
+<li><a href="/docs/database/mysql/">MySQL</a>
+<ul>
+<li><a href="/docs/database/mysql/indexes/">索引</a></li>
+<li><a href="/docs/database/mysql/trans/">事务</a></li>
+<li><a href="/docs/database/mysql/storage/">数据存储</a></li>
+<li><a href="/docs/database/mysql/cluster/">集群</a></li>
+<li><a href="/docs/database/mysql/normal/">常见面试题</a></li>
+</ul>
+</li>
+<li>NOSQL 数据库
+<ul>
+<li><a href="/docs/database/redis/">Redis</a>
+<ul>
+<li><a href="/docs/database/redis/base/"class=active>基础概念</a></li>
+<li><a href="/docs/database/redis/data/">数据结构</a></li>
+<li><a href="/docs/database/redis/high/">高可用</a></li>
+<li><a href="/docs/database/redis/apply/">应用实践</a></li>
+</ul>
+</li>
+<li><a href="/docs/database/es/">ElastiSearch</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="/docs/java/">Java</a></li>
+<li>算法
+<ul>
+<li><a href="/docs/arithmetic/data/">数据结构</a></li>
+</ul>
+</li>
+<li>中间件
+<ul>
+<li><a href="/docs/middleware/messagequeue/">消息队列</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+</nav>
+
+
+
+
+  <script>(function(){var e=document.querySelector("aside .book-menu-content");addEventListener("beforeunload",function(){localStorage.setItem("menu.scrollTop",e.scrollTop)}),e.scrollTop=localStorage.getItem("menu.scrollTop")})()</script>
+
+
+ 
+      </div>
+    </aside>
+
+    <div class="book-page">
+      <header class="book-header">
+        
+  <div class="flex align-center justify-between">
+  <label for="menu-control">
+    <img src="/svg/menu.svg" class="book-icon" alt="Menu" />
+  </label>
+
+  <strong>Redis基础概念</strong>
+
+  <label for="toc-control">
+    
+    <img src="/svg/toc.svg" class="book-icon" alt="Table of Contents" />
+    
+  </label>
+</div>
+
+
+  
+  <aside class="hidden clearfix">
+    
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么要使用redis">为什么要使用redis</a></li>
+    <li><a href="#redis为什么响应快">redis为什么响应快</a>
+      <ul>
+        <li><a href="#redis为什么是单线程">redis为什么是单线程</a></li>
+        <li><a href="#什么是多路复用-io">什么是多路复用 IO</a></li>
+        <li><a href="#redis-60-中的多线程">redis 6.0 中的多线程</a></li>
+      </ul>
+    </li>
+    <li><a href="#redis使用场景">redis使用场景</a>
+      <ul>
+        <li><a href="#热点数据缓存">热点数据缓存</a></li>
+        <li><a href="#限时业务的运用">限时业务的运用</a></li>
+        <li><a href="#延时处理">延时处理</a></li>
+        <li><a href="#计数器">计数器</a></li>
+        <li><a href="#排行榜">排行榜</a></li>
+        <li><a href="#点赞好友等关系存储">点赞、好友等关系存储</a></li>
+        <li><a href="#分布式锁">分布式锁</a></li>
+      </ul>
+    </li>
+    <li><a href="#redis版本特性">redis版本特性</a>
+      <ul>
+        <li><a href="#redis40">redis4.0</a></li>
+        <li><a href="#redis50">redis5.0</a></li>
+        <li><a href="#redis60">redis6.0</a></li>
+        <li><a href="#redis70">redis7.0</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+
+  </aside>
+  
+ 
+      </header>
+
+      
+      
+  <article class="markdown"><h1 id="redis基础概念">
+  Redis基础概念
+  <a class="anchor" href="#redis%e5%9f%ba%e7%a1%80%e6%a6%82%e5%bf%b5">#</a>
+</h1>
+<p>Redis是一款内存高速缓存数据库。Redis全称为：Remote Dictionary Server（远程数据服务），使用C语言编写，Redis是一个key-value存储系统（键值存储系统），支持丰富的数据类型，如：String、list、set、zset、hash。Redis是一种支持key-value等多种数据结构的存储系统。可用于缓存，事件发布或订阅，高速队列等场景。支持网络，提供字符串，哈希，列表，队列，集合结构直接存取，基于内存，可持久化。</p>
+<h2 id="为什么要使用redis">
+  为什么要使用redis
+  <a class="anchor" href="#%e4%b8%ba%e4%bb%80%e4%b9%88%e8%a6%81%e4%bd%bf%e7%94%a8redis">#</a>
+</h2>
+<p>使用redis主要基于其<strong>性能</strong>与<strong>并发</strong>的特点。</p>
+<p>比如一个执行耗时久并且结果变动不频繁的SQL，可以尝试将结果放到缓存中，使得请求可以快速响应。</p>
+<p>再比如一个并发很大的功能，如果每次都从数据库获取数据，由于数据库响应问题，可能会出现连接异常，照成响应失败，这时可以将数据放在redis种，提高响应速度，降低数据库压力。</p>
+<p>当然，redis除了性能与并发，也存在其他特点，现将这些特点总结如下：</p>
+<ul>
+<li>读写性能优异：Redis能读的速度是110000次/s,写的速度是81000次/s</li>
+<li>数据类型丰富：Redis支持二进制案例的 Strings, Lists, Hashes, Sets 及 Ordered Sets 数据类型操作</li>
+<li>原子性：Redis的所有操作都是原子性的，同时Redis还支持对几个操作全并后的原子性执行</li>
+<li>发布订阅：Redis支持发布/订阅模式</li>
+<li>持久化：Redis支持RDB, AOF等持久化方式</li>
+<li>支持分布式部署</li>
+</ul>
+<h2 id="redis为什么响应快">
+  redis为什么响应快
+  <a class="anchor" href="#redis%e4%b8%ba%e4%bb%80%e4%b9%88%e5%93%8d%e5%ba%94%e5%bf%ab">#</a>
+</h2>
+<p>redis响应快的主要因素有：</p>
+<ul>
+<li>redis是基于内存的，读写都在内存中进行</li>
+<li>redis是单线程的，不存在上下文切换线程</li>
+<li>redis采用多路复用IO,可以处理并发连接</li>
+<li>非阻塞IO内部实现采用epoll，采用了epoll+自己实现的简单的事件框架。epoll中的读、写、关闭、连接都转化成了事件，然后利用epoll的多路复用特性，绝不在io上浪费一点时间。</li>
+<li>数据结构优化，redis为key-value的存储，使用hash结构，读写速度快；对于特殊的数据类型也引入了特殊的数据结构进行优化，比如使用跳表加快有序的数据结构(比如zset)的读取速度</li>
+</ul>
+<h3 id="redis为什么是单线程">
+  redis为什么是单线程
+  <a class="anchor" href="#redis%e4%b8%ba%e4%bb%80%e4%b9%88%e6%98%af%e5%8d%95%e7%ba%bf%e7%a8%8b">#</a>
+</h3>
+<p>因为Redis是基于内存的操作，CPU不是Redis的瓶颈，Redis的瓶颈最有可能是机器内存的大小或者网络带宽。既然单线程容易实现，而且CPU不会成为瓶颈，那就顺理成章地采用单线程的方案了。</p>
+<ol>
+<li>不需要各种锁的性能消耗</li>
+</ol>
+<p>redis的数据结构并不全是简单的Key-Value，还有list，hash等复杂的结构，这些结构有可能会进行很细粒度的操作，比如在很长的列表后面添加一个元素，在hash当中添加或者删除
+一个对象。这些操作可能就需要加非常多的锁，导致的结果是同步开销大大增加。</p>
+<p>总之，在单线程的情况下，就不用去考虑各种锁的问题，不存在加锁释放锁操作，没有因为可能出现死锁而导致的性能消耗。</p>
+<ol start="2">
+<li>单线程多进程集群方案</li>
+</ol>
+<p>单线程的威力实际上非常强大，每核心效率也非常高，多线程自然是可以比单线程有更高的性能上限，但是在今天的计算环境中，即使是单机多线程的上限也往往不能满足需要了，需要进一步摸索的是多服务器集群化的方案，这些方案中多线程的技术照样是用不上的。</p>
+<p>所以单线程、多进程的集群不失为一个时髦的解决方案。</p>
+<ol start="3">
+<li>CPU消耗</li>
+</ol>
+<p>采用单线程，避免了不必要的上下文切换和竞争条件，也不存在多进程或者多线程导致的切换而消耗 CPU。但是如果CPU成为Redis瓶颈，或者不想让服务器其他CUP核闲置，那怎么办?可以考虑多起几个Redis进程，Redis是key-value数据库，不是关系数据库，数据之间没有约束。只要客户端分清哪些key放在哪个Redis进程上就可以了。</p>
+<h3 id="什么是多路复用-io">
+  什么是多路复用 IO
+  <a class="anchor" href="#%e4%bb%80%e4%b9%88%e6%98%af%e5%a4%9a%e8%b7%af%e5%a4%8d%e7%94%a8-io">#</a>
+</h3>
+<p>Redis单线程的优劣势单进程单线程优势代码更清晰，处理逻辑更简单不用去考虑各种锁的问题，不存在加锁释放锁操作，不会因为可能出现死锁而导致的性能消耗，不存在多进程或者多线程导致的切换而消耗CPU</p>
+<p>不过在单线程下无法发挥多核CPU性能，于是redis引入多路复用 IO 方案来保证多连接时的系统吞吐量。</p>
+<p>其中：</p>
+<ul>
+<li>多路：指的是多个socket连接，即多个网络连接</li>
+<li>复用：指的是复用一个线程</li>
+</ul>
+<p>多路复用主要有三种技术：select，poll，epoll。redi采用的是epoll。</p>
+<p>采用多路 IO 复用技术可以让单个线程高效的处理多个连接请求(尽量减少网络IO的时间消耗)，且Redis在内存中操作数据的速度非常快(内存内的操作不会成为这里的性能瓶颈)，主要以上两点造就了Redis具有很高的吞吐量。</p>
+<p>在redis中，所有的接收到的请求，都会由单线程来处理（多路复用 IO），而这个单线程并不会立即处理，而是所有的命令都会进入一个 Socket 队列中，当 socket 可读则交给单线程事件分发器逐个被执行。</p>
+<p><img src="https://static.jiangliuhong.top/images/2024/2/161708063212460.png" alt="161708063212460.png" /></p>
+<h3 id="redis-60-中的多线程">
+  redis 6.0 中的多线程
+  <a class="anchor" href="#redis-60-%e4%b8%ad%e7%9a%84%e5%a4%9a%e7%ba%bf%e7%a8%8b">#</a>
+</h3>
+<p>随着硬件性能提升，Redis 的性能瓶颈可能出现网络 IO 的读写，也就是：<strong>单个线程处理网络读写的速度跟不上底层网络硬件的速度。</strong></p>
+<p>读写网络的<code>read/write</code>系统调用占用了Redis 执行期间大部分 CPU 时间，瓶颈主要在于网络的 IO 消耗, 优化主要有两个方向:</p>
+<ul>
+<li>提高网络 IO 性能，典型的实现比如使用 DPDK 来替代内核网络栈的方式。</li>
+<li>使用多线程充分利用多核，提高网络请求读写的并行度，典型的实现比如 Memcached</li>
+</ul>
+<p>在redis中采用的办法是使用多个 IO 线程处理网络请求，提高网络请求处理的并行度。<strong>需要注意的是，Redis 多 IO 线程模型只用来处理网络读写请求，对于 Redis 的读写命令，依然是单线程处理。</strong></p>
+<p>主要流程：</p>
+<ul>
+<li>主线程负责接收建立连接请求，获取 socket 放入全局等待读处理队列；</li>
+<li>主线程通过轮询将可读 socket 分配给 IO 线程；</li>
+<li>主线程阻塞等待 IO 线程读取 socket 完成；</li>
+<li>主线程执行 IO 线程读取和解析出来的 Redis 请求命令；</li>
+<li>主线程阻塞等待 IO 线程将指令执行结果回写回 socket完毕；</li>
+<li>主线程清空全局队列，等待客户端后续的请求。</li>
+</ul>
+<p><img src="https://static.jiangliuhong.top/images/2024/2/161708064511101.png" alt="161708064511101.png" /></p>
+<p>在redis 6.0中，IO 多线程默认是关闭的，如需开启需要修改 redis.conf 配置文件：<code>io-threads-do-reads yes</code>,同时也需要执行线程数，否儿将不生效：<code>io-threads 4</code></p>
+<p>对于线程数的设置，官方有一个建议：4 核的机器建议设置为 2 或 3 个线程，8核的建议设置为 6 个线程，<strong>线程数一定要小于机器核数</strong>。</p>
+<p>线程数并不是越大越好，官方认为超过了 8 个基本就没什么意义了。</p>
+<h2 id="redis使用场景">
+  redis使用场景
+  <a class="anchor" href="#redis%e4%bd%bf%e7%94%a8%e5%9c%ba%e6%99%af">#</a>
+</h2>
+<h3 id="热点数据缓存">
+  热点数据缓存
+  <a class="anchor" href="#%e7%83%ad%e7%82%b9%e6%95%b0%e6%8d%ae%e7%bc%93%e5%ad%98">#</a>
+</h3>
+<p>缓存是Redis最常见的应用场景，之所有这么使用，主要是因为Redis读写性能优异。而且逐渐有取代memcached，成为首选服务端缓存的组件。而且，Redis内部是支持事务的，在使用时候能有效保证数据的一致性。</p>
+<p>作为缓存使用时，一般有两种方式保存数据：</p>
+<ul>
+<li>读取前，先去读Redis，如果没有数据，读取数据库，将数据拉入Redis。</li>
+<li>插入数据时，同时写入Redis。</li>
+</ul>
+<p>方案一：实施起来简单，但是有两个需要注意的地方：</p>
+<ul>
+<li>避免缓存击穿。（数据库没有就需要命中的数据，导致Redis一直没有数据，而一直命中数据库。）</li>
+<li>数据的实时性相对会差一点。</li>
+</ul>
+<p>方案二：数据实时性强，但是开发时不便于统一处理。</p>
+<p>两种方式根据实际情况来适用。如：方案一适用于对于数据实时性要求不是特别高的场景。方案二适用于字典表、数据量不大的数据存储。</p>
+<p>当然除了这两个方案，对于数据变化不大，但又强调响应速度的场景，可以预先将数据写入缓存，然后应用程序仅读取redis，然后仅在需要变更的时候，再对redis进行修改。</p>
+<h3 id="限时业务的运用">
+  限时业务的运用
+  <a class="anchor" href="#%e9%99%90%e6%97%b6%e4%b8%9a%e5%8a%a1%e7%9a%84%e8%bf%90%e7%94%a8">#</a>
+</h3>
+<p>redis中可以使用expire命令设置一个键的生存时间，到时间后redis会删除它。利用这一特性可以运用在限时的优惠活动信息、手机验证码等业务场景。</p>
+<h3 id="延时处理">
+  延时处理
+  <a class="anchor" href="#%e5%bb%b6%e6%97%b6%e5%a4%84%e7%90%86">#</a>
+</h3>
+<p>比如在订单生产后我们占用了库存，10分钟后去检验用户是否真正购买，如果没有购买将该单据设置无效，同时还原库存。 由于redis自2.8.0之后版本提供Keyspace Notifications功能，允许客户订阅Pub/Sub频道，以便以某种方式接收影响Redis数据集的事件。 所以我们对于上面的需求就可以用以下解决方案，我们在订单生产时，设置一个key，同时设置10分钟后过期， 我们在后台实现一个监听器，监听key的实效，监听到key失效时将后续逻辑加上。当然我们也可以利用rabbitmq、activemq等消息中间件的延迟队列服务实现该需求。#</p>
+<h3 id="计数器">
+  计数器
+  <a class="anchor" href="#%e8%ae%a1%e6%95%b0%e5%99%a8">#</a>
+</h3>
+<p>redis由于incrby命令可以实现原子性的递增，所以可以运用于高并发的秒杀活动、分布式序列号的生成、具体业务还体现在比如限制一个手机号发多少条短信、一个接口一分钟限制多少请求、一个接口一天限制调用多少次等等。</p>
+<h3 id="排行榜">
+  排行榜
+  <a class="anchor" href="#%e6%8e%92%e8%a1%8c%e6%a6%9c">#</a>
+</h3>
+<p>关系型数据库在排行榜方面查询速度普遍偏慢，所以可以借助redis的SortedSet进行热点数据的排序。</p>
+<p>比如点赞排行榜，做一个SortedSet, 然后以用户的openid作为上面的username, 以用户的点赞数作为上面的score, 然后针对每个用户做一个hash, 通过zrangebyscore就可以按照点赞数获取排行榜，然后再根据username获取用户的hash信息，这个当时在实际运用中性能体验也蛮不错的。</p>
+<h3 id="点赞好友等关系存储">
+  点赞、好友等关系存储
+  <a class="anchor" href="#%e7%82%b9%e8%b5%9e%e5%a5%bd%e5%8f%8b%e7%ad%89%e5%85%b3%e7%b3%bb%e5%ad%98%e5%82%a8">#</a>
+</h3>
+<p>Redis 利用集合的一些命令，比如求交集、并集、差集等。</p>
+<p>在微博应用中，每个用户关注的人存在一个集合中，就很容易实现求两个人的共同好友功能。</p>
+<h3 id="分布式锁">
+  分布式锁
+  <a class="anchor" href="#%e5%88%86%e5%b8%83%e5%bc%8f%e9%94%81">#</a>
+</h3>
+<p>这个主要利用redis的setnx命令进行，setnx：&ldquo;set if not exists&quot;就是如果不存在则成功设置缓存同时返回1，否则返回0 ，这个特性在很多后台中都有所运用，因为我们服务器是集群的，定时任务可能在两台机器上都会运行，所以在定时任务中首先 通过setnx设置一个lock， 如果成功设置则执行，如果没有成功设置，则表明该定时任务已执行。</p>
+<p>当然结合具体业务，我们可以给这个lock加一个过期时间，比如说30分钟执行一次的定时任务，那么这个过期时间设置为小于30分钟的一个时间就可以，这个与定时任务的周期以及定时任务执行消耗时间相关。</p>
+<p>在分布式锁的场景中，主要用在比如秒杀系统等。</p>
+<h2 id="redis版本特性">
+  redis版本特性
+  <a class="anchor" href="#redis%e7%89%88%e6%9c%ac%e7%89%b9%e6%80%a7">#</a>
+</h2>
+<p>TODO</p>
+<h3 id="redis40">
+  redis4.0
+  <a class="anchor" href="#redis40">#</a>
+</h3>
+<h3 id="redis50">
+  redis5.0
+  <a class="anchor" href="#redis50">#</a>
+</h3>
+<h3 id="redis60">
+  redis6.0
+  <a class="anchor" href="#redis60">#</a>
+</h3>
+<h3 id="redis70">
+  redis7.0
+  <a class="anchor" href="#redis70">#</a>
+</h3>
+</article>
+ 
+      
+
+      <footer class="book-footer">
+        
+  <div class="flex flex-wrap justify-between">
+
+
+
+
+
+</div>
+
+
+
+  <script>(function(){function e(e){const t=window.getSelection(),n=document.createRange();n.selectNodeContents(e),t.removeAllRanges(),t.addRange(n)}document.querySelectorAll("pre code").forEach(t=>{t.addEventListener("click",function(){if(window.getSelection().toString())return;e(t.parentElement),navigator.clipboard&&navigator.clipboard.writeText(t.parentElement.textContent)})})})()</script>
+
+
+ 
+        
+      </footer>
+
+      
+  
+  <div class="book-comments">
+
+</div>
+  
+ 
+
+      <label for="menu-control" class="hidden book-menu-overlay"></label>
+    </div>
+
+    
+    <aside class="book-toc">
+      <div class="book-toc-content">
+        
+  
+<nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么要使用redis">为什么要使用redis</a></li>
+    <li><a href="#redis为什么响应快">redis为什么响应快</a>
+      <ul>
+        <li><a href="#redis为什么是单线程">redis为什么是单线程</a></li>
+        <li><a href="#什么是多路复用-io">什么是多路复用 IO</a></li>
+        <li><a href="#redis-60-中的多线程">redis 6.0 中的多线程</a></li>
+      </ul>
+    </li>
+    <li><a href="#redis使用场景">redis使用场景</a>
+      <ul>
+        <li><a href="#热点数据缓存">热点数据缓存</a></li>
+        <li><a href="#限时业务的运用">限时业务的运用</a></li>
+        <li><a href="#延时处理">延时处理</a></li>
+        <li><a href="#计数器">计数器</a></li>
+        <li><a href="#排行榜">排行榜</a></li>
+        <li><a href="#点赞好友等关系存储">点赞、好友等关系存储</a></li>
+        <li><a href="#分布式锁">分布式锁</a></li>
+      </ul>
+    </li>
+    <li><a href="#redis版本特性">redis版本特性</a>
+      <ul>
+        <li><a href="#redis40">redis4.0</a></li>
+        <li><a href="#redis50">redis5.0</a></li>
+        <li><a href="#redis60">redis6.0</a></li>
+        <li><a href="#redis70">redis7.0</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+
+
+ 
+      </div>
+    </aside>
+    
+  </main>
+
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+

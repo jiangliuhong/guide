@@ -24,4 +24,8 @@ draft = false
 
 参考链接：[https://tech.meituan.com/2016/07/01/mq-design.html](https://tech.meituan.com/2016/07/01/mq-design.html)
 
+## 为什么使用mq
+
+
+
 ## rocketmq
