@@ -2,9 +2,10 @@
 title: Redis安装
 categories: 
     - 数据库
-    - Redis
 date: 2018-07-16 10:52:08
 tags:
+    - Redis
+cover: https://static.jiangliuhong.top/images/picgo/20251018232844.png
 ---
 
 # Redis安装

@@ -2,9 +2,10 @@
 title: MySQL安装
 categories: 
     - 数据库
-    - MySQL
 date: 2018-07-16 10:52:08
 tags:
+    - MySQL
+cover: https://static.jiangliuhong.top/images/picgo/20251018231638.png
 ---
 # MySQL安装
 
