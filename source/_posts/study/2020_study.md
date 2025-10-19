@@ -82,12 +82,6 @@ cover: https://static.jiangliuhong.top/blogimg/study/study-logo.jpg
 ---|---|---|---
 1|0-1背包问题|2020-07-18|[点击跳转](/2020/07/18/java/leetcode/dtgh/0_1_bei_bao_wen_ti/)
 
-## 完成`github`上的`redis-desktop`项目
-
-github地址：[https://github.com/jiangliuhong/redis-desktop](https://github.com/jiangliuhong/redis-desktop)
-
-## Aspose学习
-
 
 ## 全面学习设计模式
 
