@@ -8,7 +8,7 @@ tags:
 cover: https://static.jiangliuhong.top/blogimg/other/onlyoffice-jj.jpg
 ---
 
-# onlyoffice安装
+## onlyoffice安装
 
 采用`docker`进行安装，命令为：
 
@@ -21,7 +21,7 @@ docker run -itd -p 8009:80 onlyoffice/documentserver:5.5
 
 访问`127.0.0.1:8009`
 
-# onlyoffice汉化
+## onlyoffice汉化
 
 1. 删除容器里的文件，替换windows下的字体。
 
@@ -102,7 +102,7 @@ html文件：
 </html>
 ```
 
-# 导出自己的镜像
+## 导出自己的镜像
 
 在上一步中对容器内的onlyoffice进行了中文汉化，但是如果此时删除容器，再创建容器，则需要在进行一次操作，此时就需要把容器导出为镜像，命令如下：
 

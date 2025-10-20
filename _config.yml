@@ -3,7 +3,7 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: jarome
+title: Jarome'Blog
 subtitle: ''
 description: '平凡的脚步也能走出伟大的行程。'
 keywords: jarome
@@ -104,3 +104,9 @@ theme: solitude
 ## Docs: https://hexo.io/docs/one-command-deployment
 deploy:
   type: ''
+
+search:
+  path: search.xml
+  field: post
+  content: true
+  template:

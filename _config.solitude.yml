@@ -20,7 +20,7 @@
 site:
   name:
     class: text # text / i_class / img
-    custom: jarome # Solitude / fas fa-ghost / /img/pwa/favicon.ico
+    custom: Jarome'Blog # Solitude / fas fa-ghost / /img/pwa/favicon.ico
   icon: /img/coding.png # Site icon / 网站图标
 # --------------------------- end ---------------------------
 
@@ -840,8 +840,8 @@ giscus:
 # --------------------------- start ---------------------------
 # Search
 search:
-  enable: false
-  type: # local / algolia / docsearch
+  enable: true
+  type: local # local / algolia / docsearch
   tags:
     # - Solitude
     # - Hexo

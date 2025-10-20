@@ -6,7 +6,6 @@ tags:
     - nginx
     - 网关
 ---
-# nginx配置
 
 ## nginx常用编译参数
 
@@ -22,7 +21,7 @@ tags:
 - –with-http_realip_module ： 通过这个模块允许我们改变客户端请求头中客户端IP地址值(例如X-Real-IP 或 X-Forwarded-For)，意义在于能够使得后台服务器记录原始客户端的IP地址
 - –add-module=PATH ： 添加第三方外部模块，如nginx-sticky-module-ng或缓存模块。每次添加新的模块都要重新编译（Tengine可以在新加入module时无需重新编译）
 
- ## config基本配置概览
+## config基本配置概览
 
 Nginx的配置文件默认在Nginx程序安装目录的conf目录下，其中核心文件为nginx.conf，当然你也可以自己写配置文件，然后在nginx.conf中引用。
 

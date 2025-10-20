@@ -27,9 +27,6 @@ wget https://sonatype-download.global.ssl.fastly.net/repository/downloads-prod-g
 
 使用`tar`命令解压后，会看到两个目录
 
-### docker安装
-
-> TODO 待更新
 
 
 
