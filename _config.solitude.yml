@@ -21,7 +21,7 @@ site:
   name:
     class: text # text / i_class / img
     custom: jarome # Solitude / fas fa-ghost / /img/pwa/favicon.ico
-  icon: /img/pwa/favicon.png # Site icon / 网站图标
+  icon: /img/coding.png # Site icon / 网站图标
 # --------------------------- end ---------------------------
 
 # --------------------------- start ---------------------------
@@ -42,6 +42,8 @@ nav:
       归档: /archives/ || fas fa-folder-closed # item name: link || icon
       分类: /categories/ || fas fa-clone
       标签: /tags/ || fas fa-tags
+    知识点: /knowledge/
+    关于我: /about/ 
     # 友链:
     #   朋友圈: /moments/ || fas fa-wifi
     #   友情链接: /links/ || fas fa-user-group
@@ -196,7 +198,7 @@ aside:
     runtimeenable: true
     # Format: yyyy-MM-dd hh-mm-ss
     # 格式: yyyy-MM-dd hh-mm-ss
-    runtime: "2023-04-20 00:00:00"
+    runtime: "2018-04-20 00:00:00"
   # --------------------------- end ---------------------------
 # --------------------------- end ---------------------------
 

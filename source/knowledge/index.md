@@ -1,10 +1,6 @@
 ---
-title: 知识点汇总
-date: 2025-10-19 22:23:56
-categories:
-  - study
-tags:
-cover: https://static.jiangliuhong.top/images/2021/4/articleeede4021-e950-40f2-8083-6a2f8e06f5e3.png
+title: knowledge
+date: 2025-10-20 13:59:34
 ---
 
 ## 数据库
