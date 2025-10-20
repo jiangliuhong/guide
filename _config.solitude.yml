@@ -443,11 +443,11 @@ right_menu:
 #  information
 # 复制信息
 copy:
-  enable: false
+  enable: true
   # Turn on Link copyright information after copying.
   # 复制后链接版权信息
   copyright:
-    enable: false
+    enable: true
     # Display when the number of words copied exceeds
     # 复制文字时超过多少字数显示
     limit: 50
