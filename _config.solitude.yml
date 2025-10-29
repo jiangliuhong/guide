@@ -929,26 +929,26 @@ busuanzi_use: 0
 # Google Adsense
 # 谷歌广告
 google_adsense:
-  enable: false
+  enable: true
   # Auto ads
   # 自动广告
   auto_ads: false
   # Page-level ads
   # 页面级广告
-  enable_page_level_ads: true
+  enable_page_level_ads: false
   # Sidebar card ads
   # 侧边栏卡片广告
   aside_card: true
   # Post card ads
   # 文章卡片广告
-  post_card: true
+  post_card: false
   # Post content ads
   # 文章内容广告
-  post_content: true
+  post_content: false
   # Google Adsense js
   # 谷歌广告 js
   js: https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js
-  client: # ca-pub-XXXXXXXXXXXXXX
+  client: ca-pub-9185481404514034 # ca-pub-XXXXXXXXXXXXXX
   slot: # 4236388782
 # --------------------------- end ---------------------------
 
