@@ -932,7 +932,7 @@ google_adsense:
   enable: true
   # Auto ads
   # 自动广告
-  auto_ads: false
+  auto_ads: true
   # Page-level ads
   # 页面级广告
   enable_page_level_ads: false
@@ -941,7 +941,7 @@ google_adsense:
   aside_card: true
   # Post card ads
   # 文章卡片广告
-  post_card: false
+  post_card: true
   # Post content ads
   # 文章内容广告
   post_content: false
